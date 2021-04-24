@@ -7,6 +7,7 @@ var state = STATES.ALIVE
 signal fuel_changed
 signal gem_changed
 
+export var walk_speed := 960.0
 export var start_fuel := 30
 export var start_pos := Vector2(1, -1)
 export var gem_pickup_value := 1
@@ -20,8 +21,10 @@ var grid_pos: Vector2
 
 const Main := preload("res://main.gd")
 const End := preload("res://gui/end.tscn")
+const DirectionalInput := preload("res://player/directional_input.gd")
 onready var game: Main = $"../"
 onready var tilemap: TileMap = $"../Level/TileMap"
+onready var dir_input: DirectionalInput = $DirectionalInput
 
 
 func _ready() -> void:
@@ -36,19 +39,19 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_tree().reload_current_scene()
 		else:
 			return
-	var left_just_pressed := event.is_action_pressed("ui_left")
-	var right_just_pressed := event.is_action_pressed("ui_right")
-	var up_just_pressed := event.is_action_pressed("ui_up")
-	var down_just_pressed := event.is_action_pressed("ui_down")
-	
-	if right_just_pressed:
-		_handle_move(1, 0)
-	if left_just_pressed:
-		_handle_move(-1, 0)
-	if down_just_pressed:
-		_handle_move(0, 1)
-	if up_just_pressed:
-		_handle_move(0, -1)
+#	var left_just_pressed := event.is_action_pressed("ui_left")
+#	var right_just_pressed := event.is_action_pressed("ui_right")
+#	var up_just_pressed := event.is_action_pressed("ui_up")
+#	var down_just_pressed := event.is_action_pressed("ui_down")
+#
+#	if right_just_pressed:
+#		_handle_move(1, 0)
+#	if left_just_pressed:
+#		_handle_move(-1, 0)
+#	if down_just_pressed:
+#		_handle_move(0, 1)
+#	if up_just_pressed:
+#		_handle_move(0, -1)
 
 
 func _handle_move(x: int, y: int):
@@ -96,3 +99,9 @@ func _grid_to_pos():
 	position.x = 32 + (grid_pos.x * 64)
 	position.y = 32 + ((grid_pos.y + 1) * 64)
 	
+
+func _physics_process(delta) -> void:
+	var dir = dir_input.get_input()
+	var velocity = dir * walk_speed
+	velocity.y = clamp(velocity.y, 0, INF)
+	move_and_slide(velocity)

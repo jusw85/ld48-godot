@@ -64,6 +64,7 @@ restart={
 
 2d_physics/layer_1="solid"
 2d_physics/layer_2="collectibles"
+2d_physics/layer_3="player"
 
 [rendering]
 
