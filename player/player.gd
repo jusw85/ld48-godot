@@ -6,15 +6,17 @@ signal gem_changed
 
 export var start_fuel := 30
 export var start_pos := Vector2(1, -1)
+export var gem_pickup_value := 1
 export var fuel_pickup_value := 1
+export var soil_fuel_needed := 1
+export var rock_fuel_needed := 2
 
 var fuel: int
 var gem := 0
 var grid_pos: Vector2
 
-#const DirectionalInput := preload("res://player/directional_input.gd")
-#onready var directional_input: DirectionalInput = $DirectionalInput
-
+const Main := preload("res://main.gd")
+onready var game: Main = $"../"
 onready var tilemap: TileMap = $"../Level/TileMap"
 
 
@@ -41,31 +43,46 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_move(x: int, y: int):
-	_add_fuel(-1)
-	_grid_move(x, y)
-	var tile := tilemap.get_cellv(grid_pos)
+	var new_pos = grid_pos + Vector2(x, y)
+
+#	check OOB
+	if new_pos.x < game.bounds_min.x or \
+		new_pos.x > game.bounds_max.x or \
+		new_pos.y < game.bounds_min.y - 1 or \
+		new_pos.y > game.bounds_max.y:
+		return
+		
+	var tile := tilemap.get_cellv(new_pos)
 	match tile:
-		0:
-			_add_fuel(fuel_pickup_value)
-		1:
-			gem += 1
+		0: # fuel
+			_change_fuel(fuel_pickup_value)
+		1: # gem
+			gem += gem_pickup_value
 			emit_signal("gem_changed", gem)
+		2: # rock
+			_change_fuel(-rock_fuel_needed)
+		3: # soil
+			_change_fuel(-soil_fuel_needed)
+
+	grid_pos = new_pos
+	_grid_to_pos()
+	
 	tilemap.set_cellv(grid_pos, -1)
 
 
-func _add_fuel(val: int):
+func _change_fuel(val: int):
 	fuel += val
 	fuel = clamp(fuel, 0, INF)
 	emit_signal("fuel_changed", fuel)
 	
 
-func _grid_move(x: int, y: int) -> bool:
-	grid_pos.x += x
-	grid_pos.y += y
-	grid_pos.y = clamp(grid_pos.y, -1, 31)
-	grid_pos.x = clamp(grid_pos.x, 0, 19)
-	_grid_to_pos()
-	return true
+#func _grid_move(x: int, y: int) -> bool:
+#	grid_pos.x += x
+#	grid_pos.y += y
+#	grid_pos.y = clamp(grid_pos.y, -1, 31)
+#	grid_pos.x = clamp(grid_pos.x, 0, 19)
+#	_grid_to_pos()
+#	return true
 
 
 func _grid_to_pos():
