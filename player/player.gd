@@ -82,8 +82,6 @@ func _physics_process(_delta) -> void:
 	velocity.y += gravity
 	velocity.y = clamp(velocity.y, 0, INF)
 	move_and_slide(velocity)
-	
-	_flip_sprite(dir.x)
 
 	if is_grounded and r_cast.is_colliding() and dir.x > 0:
 		var pos := r_cast.get_collision_point()
@@ -94,6 +92,12 @@ func _physics_process(_delta) -> void:
 		var pos := l_cast.get_collision_point()
 		pos.x -= 1
 		_try_eat_rock(pos)
+		
+	if not state == STATES.DEAD and is_grounded and velocity.x != 0.0:
+		sprite.play("walking")
+	else:
+		sprite.play("idle")
+	_flip_sprite(dir.x)
 
 
 func _global_pos_to_tileinfo(pos: Vector2) -> TileInfo:
