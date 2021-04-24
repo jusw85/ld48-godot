@@ -16,8 +16,6 @@ signal gem_changed
 export var walk_speed := 600.0
 export var gravity := 500.0
 export var start_fuel := 30
-export var soil_fuel_needed := 1
-export var rock_fuel_needed := 2
 
 var fuel: int
 var gem := 0
@@ -46,31 +44,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_tree().reload_current_scene()
 		else:
 			return
-#	elif state == STATES.PUNCH_R:
-#		return
-
-#	var left_just_pressed := event.is_action_pressed("ui_left")
-#	var right_just_pressed := event.is_action_pressed("ui_right")
-#	var up_just_pressed := event.is_action_pressed("ui_up")
-
-#	var down_just_pressed := event.is_action_pressed("ui_down")
-#	if down_just_pressed and ground_cast.is_colliding():
-#		var pos := ground_cast.get_collision_point()
-#		pos.y += 1
-#
-#		var tileinfo := _global_pos_to_tileinfo(pos)
-#		if tileinfo.tile_id == 4:
-#			var rock_id := int(tileinfo.autotile_id.x)
-#			match rock_id:
-#				1:
-#					change_fuel(-soil_fuel_needed)
-#				7:
-#					change_fuel(-rock_fuel_needed)
-#				_:
-#					change_fuel(-soil_fuel_needed)
-#			sprite.play("punchdown")
-#			state = STATES.PUNCH_R
-#			to_del_downpunch = tileinfo
 
 
 func change_gem(val: int):
@@ -112,7 +85,7 @@ func _physics_process(_delta) -> void:
 		if _try_eat_rock(pos):
 			state = STATES.PUNCH_R
 
-	if is_grounded and l_cast.is_colliding() and dir.x < 0:
+	if state == STATES.IDLE and is_grounded and l_cast.is_colliding() and dir.x < 0:
 		var pos := l_cast.get_collision_point()
 		pos.x -= 1
 		if _try_eat_rock(pos):
@@ -124,14 +97,7 @@ func _physics_process(_delta) -> void:
 
 		var tileinfo := _global_pos_to_tileinfo(pos)
 		if tileinfo.tile_id == 4:
-			var rock_id := int(tileinfo.autotile_id.x)
-			match rock_id:
-				1:
-					change_fuel(-soil_fuel_needed)
-				7:
-					change_fuel(-rock_fuel_needed)
-				_:
-					change_fuel(-soil_fuel_needed)
+			change_fuel(-1)
 			state = STATES.PUNCH_D
 			to_del_downpunch = tileinfo
 
@@ -166,15 +132,15 @@ func _global_pos_to_tileinfo(pos: Vector2) -> TileInfo:
 func _try_eat_rock(pos: Vector2) -> bool:
 	var tileinfo := _global_pos_to_tileinfo(pos)
 	if tileinfo.tile_id == 4:
-		tilemap.set_cellv(tileinfo.grid_pos, -1)
+		change_fuel(-1)
 		var rock_id := int(tileinfo.autotile_id.x)
-		match rock_id:
-			1:
-				change_fuel(-soil_fuel_needed)
-			7:
-				change_fuel(-rock_fuel_needed)
-			_:
-				change_fuel(-soil_fuel_needed)
+		if rock_id == 1:
+			tilemap.set_cellv(tileinfo.grid_pos, -1)
+		else:
+			var new_autotile = tileinfo.autotile_id
+			new_autotile.x -= 1
+			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
+				tileinfo.tile_id, false, false, false, new_autotile)
 		return true
 	return false
 
@@ -187,9 +153,19 @@ func _flip_sprite(x_input: int) -> void:
 
 func _on_AnimatedSprite_animation_finished():
 	if sprite.animation == "punchright":
+		sprite.animation = "idle"
 		state = STATES.IDLE
 	elif sprite.animation == "punchdown":
-		tilemap.set_cellv(to_del_downpunch.grid_pos, -1)
+		var tileinfo = to_del_downpunch
+		var rock_id := int(tileinfo.autotile_id.x)
+		if rock_id == 1:
+			tilemap.set_cellv(tileinfo.grid_pos, -1)
+		else:
+			var new_autotile = tileinfo.autotile_id
+			new_autotile.x -= 1
+			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
+				tileinfo.tile_id, false, false, false, new_autotile)
+		sprite.animation = "idle"
 		state = STATES.IDLE
 
 	if fuel <= 0:
