@@ -1,6 +1,9 @@
 extends KinematicBody2D
 
 
+enum STATES {ALIVE, DEAD}
+var state = STATES.ALIVE
+
 signal fuel_changed
 signal gem_changed
 
@@ -16,6 +19,7 @@ var gem := 0
 var grid_pos: Vector2
 
 const Main := preload("res://main.gd")
+const End := preload("res://gui/end.tscn")
 onready var game: Main = $"../"
 onready var tilemap: TileMap = $"../Level/TileMap"
 
@@ -27,6 +31,11 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if state == STATES.DEAD:
+		if event.is_action_pressed("restart"):
+			get_tree().reload_current_scene()
+		else:
+			return
 	var left_just_pressed := event.is_action_pressed("ui_left")
 	var right_just_pressed := event.is_action_pressed("ui_right")
 	var up_just_pressed := event.is_action_pressed("ui_up")
@@ -74,24 +83,12 @@ func _change_fuel(val: int):
 	fuel += val
 	fuel = clamp(fuel, 0, INF)
 	emit_signal("fuel_changed", fuel)
+	if fuel <= 0:
+		state = STATES.DEAD
+		$"../GUI".add_child(End.instance())
 	
-
-#func _grid_move(x: int, y: int) -> bool:
-#	grid_pos.x += x
-#	grid_pos.y += y
-#	grid_pos.y = clamp(grid_pos.y, -1, 31)
-#	grid_pos.x = clamp(grid_pos.x, 0, 19)
-#	_grid_to_pos()
-#	return true
-
 
 func _grid_to_pos():
 	position.x = 32 + (grid_pos.x * 64)
 	position.y = 32 + ((grid_pos.y + 1) * 64)
 	
-	
-func _physics_process(_delta) -> void:
-	pass
-#	var dir = directional_input.get_input()
-#	move_and_collide(velocity)
-
