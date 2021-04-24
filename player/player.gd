@@ -68,7 +68,7 @@ func change_fuel(val: int):
 	if fuel <= 0:
 		state = STATES.DEAD
 		$"../GUI".add_child(End.instance())
-	
+
 
 func _physics_process(_delta) -> void:
 	if state == STATES.DEAD:

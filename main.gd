@@ -10,10 +10,10 @@ var bounds_max := Vector2(-INF, -INF)
 
 func _ready() -> void:
 	_calculate_map_bounds()
-	_relace_map_tiles_with_objects()
+	_replace_map_tiles_with_objects()
 
 
-func _relace_map_tiles_with_objects():
+func _replace_map_tiles_with_objects():
 	var fuels = tilemap.get_used_cells_by_id(0)
 	for pos in fuels:
 		tilemap.set_cellv(pos, -1)
