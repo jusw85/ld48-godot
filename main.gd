@@ -22,7 +22,7 @@ func _replace_map_tiles_with_objects():
 		var local_pos = tilemap.map_to_world(pos)
 		var global_pos = tilemap.to_global(local_pos)
 		instance.position = global_pos
-		
+
 	var gems = tilemap.get_used_cells_by_id(1)
 	for pos in gems:
 		tilemap.set_cellv(pos, -1)
@@ -52,4 +52,4 @@ func _unhandled_input(event: InputEvent) -> void:
 			OS.get_name() == "OSX" or
 			OS.get_name() == "X11"):
 		get_tree().quit()
-	
+
