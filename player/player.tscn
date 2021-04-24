@@ -32,3 +32,9 @@ limit_bottom = 2112
 
 [node name="Mask" type="Sprite" parent="."]
 texture = ExtResource( 4 )
+
+[node name="GroundCast" type="RayCast2D" parent="."]
+position = Vector2( 0, 30 )
+enabled = true
+exclude_parent = false
+cast_to = Vector2( 0, 10 )
