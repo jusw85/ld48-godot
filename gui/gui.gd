@@ -4,7 +4,7 @@ onready var fuel_label = $Fuel/Val
 
 
 func _ready() -> void:
-	_update_fuel($"../Player".max_fuel)
+	_update_fuel($"../../Player".max_fuel)
 	
 
 func _update_fuel(fuel: int) -> void:
