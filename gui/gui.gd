@@ -6,7 +6,7 @@ onready var gem_label = $VBoxContainer/Gem/Val
 
 func _ready() -> void:
 	_update_fuel($"../../Player".start_fuel)
-	
+
 
 func _update_fuel(fuel: int) -> void:
 	fuel_label.text = str(fuel)
