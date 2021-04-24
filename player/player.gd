@@ -63,51 +63,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				_:
 					change_fuel(-soil_fuel_needed)
 
-#	if right_just_pressed:
-#		_handle_move(1, 0)
-#	if left_just_pressed:
-#		_handle_move(-1, 0)
-#	if down_just_pressed:
-#		_handle_move(0, 1)
-#	if up_just_pressed:
-#		_handle_move(0, -1)
-
-
-#func _handle_move(x: int, y: int):
-#	var new_pos = grid_pos + Vector2(x, y)
-#
-##	check OOB
-#	if new_pos.x < game.bounds_min.x or \
-#		new_pos.x > game.bounds_max.x or \
-#		new_pos.y < game.bounds_min.y - 1 or \
-#		new_pos.y > game.bounds_max.y:
-#		return
-#
-#	var tile := tilemap.get_cellv(new_pos)
-#	match tile:
-#		0: # fuel
-#			_change_fuel(fuel_pickup_value)
-#		1: # gem
-#			gem += gem_pickup_value
-#			emit_signal("gem_changed", gem)
-#		4: # soils
-#			var subtype = tilemap.get_cell_autotile_coord(new_pos.x, new_pos.y)
-#			if subtype.x == 1:
-#				_change_fuel(-soil_fuel_needed)
-#			elif subtype.x == 7:
-#				_change_fuel(-rock_fuel_needed)
-#			else:
-#				print("unrecognized soil: " + str(subtype))
-#
-#	grid_pos = new_pos
-#	_grid_to_pos()
-#
-#	tilemap.set_cellv(grid_pos, -1)
-
 
 func change_gem(val: int):
 	gem += val
 	emit_signal("gem_changed", gem)
+
 		
 func change_fuel(val: int):
 	fuel += val
@@ -116,11 +76,6 @@ func change_fuel(val: int):
 	if fuel <= 0:
 		state = STATES.DEAD
 		$"../GUI".add_child(End.instance())
-	
-
-#func _grid_to_pos():
-#	position.x = 32 + (grid_pos.x * 64)
-#	position.y = 32 + ((grid_pos.y + 1) * 64)
 	
 
 func _physics_process(_delta) -> void:
