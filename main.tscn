@@ -23,7 +23,7 @@ position = Vector2( 0, 64 )
 [node name="Player" parent="." instance=ExtResource( 2 )]
 position = Vector2( 96, 32 )
 z_index = 1
-start_fuel = 50
+start_fuel = 5
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 3 )

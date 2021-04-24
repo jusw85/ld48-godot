@@ -7,7 +7,7 @@ class TileInfo:
 	var autotile_id: Vector2
 
 
-enum STATES {IDLE, DEAD, WALKING, FALLING, PUNCH_R}
+enum STATES {IDLE, DEAD, WALKING, FALLING, PUNCH_R, PUNCH_D}
 var state = STATES.IDLE
 
 signal fuel_changed
@@ -46,31 +46,31 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_tree().reload_current_scene()
 		else:
 			return
-	elif state == STATES.PUNCH_R:
-		return
+#	elif state == STATES.PUNCH_R:
+#		return
 
 #	var left_just_pressed := event.is_action_pressed("ui_left")
 #	var right_just_pressed := event.is_action_pressed("ui_right")
 #	var up_just_pressed := event.is_action_pressed("ui_up")
 
-	var down_just_pressed := event.is_action_pressed("ui_down")
-	if down_just_pressed and ground_cast.is_colliding():
-		var pos := ground_cast.get_collision_point()
-		pos.y += 1
-
-		var tileinfo := _global_pos_to_tileinfo(pos)
-		if tileinfo.tile_id == 4:
-			var rock_id := int(tileinfo.autotile_id.x)
-			match rock_id:
-				1:
-					change_fuel(-soil_fuel_needed)
-				7:
-					change_fuel(-rock_fuel_needed)
-				_:
-					change_fuel(-soil_fuel_needed)
-			sprite.play("punchdown")
-			state = STATES.PUNCH_R
-			to_del_downpunch = tileinfo
+#	var down_just_pressed := event.is_action_pressed("ui_down")
+#	if down_just_pressed and ground_cast.is_colliding():
+#		var pos := ground_cast.get_collision_point()
+#		pos.y += 1
+#
+#		var tileinfo := _global_pos_to_tileinfo(pos)
+#		if tileinfo.tile_id == 4:
+#			var rock_id := int(tileinfo.autotile_id.x)
+#			match rock_id:
+#				1:
+#					change_fuel(-soil_fuel_needed)
+#				7:
+#					change_fuel(-rock_fuel_needed)
+#				_:
+#					change_fuel(-soil_fuel_needed)
+#			sprite.play("punchdown")
+#			state = STATES.PUNCH_R
+#			to_del_downpunch = tileinfo
 
 
 func change_gem(val: int):
@@ -88,14 +88,17 @@ func change_fuel(val: int):
 
 
 func _physics_process(_delta) -> void:
-	if state == STATES.DEAD:
+	if state == STATES.PUNCH_R:
+		assert(sprite.animation == "punchright")
 		return
-	elif state == STATES.PUNCH_R:
-#		assert(sprite.animation == "punchright")
+	elif state == STATES.PUNCH_D:
+		assert(sprite.animation == "punchdown")
 		return
 
 	var is_grounded = ground_cast.is_colliding()
 	var dir = dir_input.get_input()
+	if state == STATES.DEAD:
+		dir = Vector2.ZERO
 
 	var velocity = Vector2()
 	velocity.x = dir.x * walk_speed
@@ -115,11 +118,30 @@ func _physics_process(_delta) -> void:
 		if _try_eat_rock(pos):
 			state = STATES.PUNCH_R
 
+	if state == STATES.IDLE and is_grounded and dir.y > 0:
+		var pos := ground_cast.get_collision_point()
+		pos.y += 1
+
+		var tileinfo := _global_pos_to_tileinfo(pos)
+		if tileinfo.tile_id == 4:
+			var rock_id := int(tileinfo.autotile_id.x)
+			match rock_id:
+				1:
+					change_fuel(-soil_fuel_needed)
+				7:
+					change_fuel(-rock_fuel_needed)
+				_:
+					change_fuel(-soil_fuel_needed)
+			state = STATES.PUNCH_D
+			to_del_downpunch = tileinfo
+
 	if state == STATES.DEAD:
 		sprite.play("idle")
 	else:
 		if state == STATES.PUNCH_R:
 			sprite.play("punchright")
+		elif state == STATES.PUNCH_D:
+			sprite.play("punchdown")
 		elif is_grounded and velocity.x != 0.0:
 			sprite.play("walking")
 		else:
@@ -166,6 +188,11 @@ func _flip_sprite(x_input: int) -> void:
 func _on_AnimatedSprite_animation_finished():
 	if sprite.animation == "punchright":
 		state = STATES.IDLE
-	if sprite.animation == "punchdown":
+	elif sprite.animation == "punchdown":
 		tilemap.set_cellv(to_del_downpunch.grid_pos, -1)
 		state = STATES.IDLE
+
+	if fuel <= 0:
+		sprite.animation = "idle"
+		state = STATES.DEAD
+		return
