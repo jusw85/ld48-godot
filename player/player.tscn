@@ -19,7 +19,7 @@ script = ExtResource( 1 )
 texture = ExtResource( 3 )
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
-position = Vector2( -1.68179, 4.2045 )
+position = Vector2( 0, 4.205 )
 shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -35,5 +35,12 @@ texture = ExtResource( 4 )
 [node name="GroundCast" type="RayCast2D" parent="."]
 position = Vector2( 0, 30 )
 enabled = true
-exclude_parent = false
 cast_to = Vector2( 0, 10 )
+
+[node name="RightCast" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( 16, 0 )
+
+[node name="LeftCast" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( -16, 0 )
