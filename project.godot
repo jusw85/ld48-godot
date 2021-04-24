@@ -60,6 +60,11 @@ restart={
  ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="solid"
+2d_physics/layer_2="collectibles"
+
 [rendering]
 
 quality/driver/driver_name="GLES2"

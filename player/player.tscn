@@ -27,5 +27,5 @@ limit_top = -192
 limit_right = 1280
 limit_bottom = 2112
 
-[node name="Sprite2" type="Sprite" parent="."]
+[node name="Mask" type="Sprite" parent="."]
 texture = ExtResource( 4 )
