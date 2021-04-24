@@ -45,6 +45,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_tree().reload_current_scene()
 		else:
 			return
+	elif state == STATES.PUNCH_R:
+		return
 
 #	var left_just_pressed := event.is_action_pressed("ui_left")
 #	var right_just_pressed := event.is_action_pressed("ui_right")
