@@ -32,6 +32,7 @@ onready var dir_input: DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
+onready var sprite: AnimatedSprite = $AnimatedSprite
 
 
 func _ready() -> void:
@@ -74,12 +75,15 @@ func _physics_process(_delta) -> void:
 	if state == STATES.DEAD:
 		return
 	var is_grounded = ground_cast.is_colliding()
-	var velocity = Vector2()
 	var dir = dir_input.get_input()
+	
+	var velocity = Vector2()
 	velocity.x = dir.x * walk_speed
 	velocity.y += gravity
 	velocity.y = clamp(velocity.y, 0, INF)
 	move_and_slide(velocity)
+	
+	_flip_sprite(dir.x)
 
 	if is_grounded and r_cast.is_colliding() and dir.x > 0:
 		var pos := r_cast.get_collision_point()
@@ -118,3 +122,10 @@ func _try_eat_rock(pos: Vector2) -> void:
 				change_fuel(-rock_fuel_needed)
 			_:
 				change_fuel(-soil_fuel_needed)
+
+
+func _flip_sprite(x_input: int) -> void:
+	if x_input > 0:
+		sprite.flip_h = false
+	elif x_input < 0:
+		sprite.flip_h = true

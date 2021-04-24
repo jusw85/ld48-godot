@@ -82,17 +82,17 @@ region = Rect2( 192, 0, 64, 64 )
 [sub_resource type="SpriteFrames" id=16]
 animations = [ {
 "frames": [ SubResource( 17 ) ],
-"loop": true,
+"loop": false,
 "name": "idle",
 "speed": 5.0
 }, {
 "frames": [ SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
-"loop": true,
+"loop": false,
 "name": "punchright",
 "speed": 10.0
 }, {
 "frames": [ SubResource( 21 ), SubResource( 22 ), SubResource( 23 ), SubResource( 24 ), SubResource( 25 ), SubResource( 26 ) ],
-"loop": true,
+"loop": false,
 "name": "punchdown",
 "speed": 10.0
 }, {
