@@ -18,9 +18,11 @@ position = Vector2( 0, 64 )
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
 position = Vector2( 96, 32 )
-max_fuel = 20
+start_fuel = 20
+fuel_pickup_value = 2
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 3 )
 
 [connection signal="fuel_changed" from="Player" to="CanvasLayer/Gui" method="_on_Player_fuel_changed"]
+[connection signal="gem_changed" from="Player" to="CanvasLayer/Gui" method="_on_Player_gem_changed"]

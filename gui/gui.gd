@@ -1,10 +1,11 @@
 extends MarginContainer
 
-onready var fuel_label = $Fuel/Val
+onready var fuel_label = $VBoxContainer/Fuel/Val
+onready var gem_label = $VBoxContainer/Gem/Val
 
 
 func _ready() -> void:
-	_update_fuel($"../../Player".max_fuel)
+	_update_fuel($"../../Player".start_fuel)
 	
 
 func _update_fuel(fuel: int) -> void:
@@ -13,3 +14,7 @@ func _update_fuel(fuel: int) -> void:
 
 func _on_Player_fuel_changed(fuel: int):
 	_update_fuel(fuel)
+
+
+func _on_Player_gem_changed(gem: int):
+	gem_label.text = str(gem)
