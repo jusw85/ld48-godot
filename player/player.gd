@@ -10,28 +10,24 @@ signal gem_changed
 export var walk_speed := 600.0
 export var gravity := 500.0
 export var start_fuel := 30
-export var start_pos := Vector2(1, -1)
-export var gem_pickup_value := 1
 export var soil_fuel_needed := 1
 export var rock_fuel_needed := 2
 
 var fuel: int
 var gem := 0
-#var grid_pos: Vector2
+
+const End := preload("res://gui/end.tscn")
 
 const Main := preload("res://main.gd")
-const End := preload("res://gui/end.tscn")
-const DirectionalInput := preload("res://player/directional_input.gd")
 onready var game: Main = $"../"
 onready var tilemap: TileMap = $"../Level/TileMap"
+const DirectionalInput := preload("res://player/directional_input.gd")
 onready var dir_input: DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
 
 
 func _ready() -> void:
 	fuel = start_fuel
-#	grid_pos = start_pos
-#	_grid_to_pos()
 
 
 func _unhandled_input(event: InputEvent) -> void:
