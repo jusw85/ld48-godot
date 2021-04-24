@@ -68,10 +68,14 @@ func _handle_move(x: int, y: int):
 		1: # gem
 			gem += gem_pickup_value
 			emit_signal("gem_changed", gem)
-		2: # rock
-			_change_fuel(-rock_fuel_needed)
-		3: # soil
-			_change_fuel(-soil_fuel_needed)
+		4: # soils
+			var subtype = tilemap.get_cell_autotile_coord(new_pos.x, new_pos.y)
+			if subtype.x == 1:
+				_change_fuel(-soil_fuel_needed)
+			elif subtype.x == 7:
+				_change_fuel(-rock_fuel_needed)
+			else:
+				print("unrecognized soil: " + str(subtype))
 
 	grid_pos = new_pos
 	_grid_to_pos()
