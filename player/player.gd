@@ -8,11 +8,10 @@ signal fuel_changed
 signal gem_changed
 
 export var walk_speed := 600.0
-export var gravity := 200.0
+export var gravity := 500.0
 export var start_fuel := 30
 export var start_pos := Vector2(1, -1)
 export var gem_pickup_value := 1
-export var fuel_pickup_value := 1
 export var soil_fuel_needed := 1
 export var rock_fuel_needed := 2
 
@@ -58,11 +57,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			tilemap.set_cellv(grid_pos, -1)
 			match rock_id:
 				1:
-					_change_fuel(-soil_fuel_needed)
+					change_fuel(-soil_fuel_needed)
 				7:
-					_change_fuel(-rock_fuel_needed)
+					change_fuel(-rock_fuel_needed)
 				_:
-					_change_fuel(-soil_fuel_needed)
+					change_fuel(-soil_fuel_needed)
 
 #	if right_just_pressed:
 #		_handle_move(1, 0)
@@ -106,7 +105,11 @@ func _unhandled_input(event: InputEvent) -> void:
 #	tilemap.set_cellv(grid_pos, -1)
 
 
-func _change_fuel(val: int):
+func change_gem(val: int):
+	gem += val
+	emit_signal("gem_changed", gem)
+		
+func change_fuel(val: int):
 	fuel += val
 	fuel = clamp(fuel, 0, INF)
 	emit_signal("fuel_changed", fuel)
@@ -121,8 +124,9 @@ func _change_fuel(val: int):
 	
 
 func _physics_process(_delta) -> void:
+	var velocity = Vector2()
 	var dir = dir_input.get_input()
-	var velocity = dir * walk_speed
+	velocity.x = dir.x * walk_speed
 	velocity.y += gravity
 	velocity.y = clamp(velocity.y, 0, INF)
 	move_and_slide(velocity)
