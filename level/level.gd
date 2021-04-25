@@ -8,6 +8,7 @@ onready var soil: TileMap = $Soil
 var bounds_min := Vector2(INF, INF)
 var bounds_max := Vector2(-INF, -INF)
 
+var gen_depth := 0
 var gen_bottom := 0
 var gen_buffer := 7
 var gen_range := 10
@@ -62,20 +63,15 @@ func _replace_map_tiles_with_objects():
 # fuel: 0
 # gem: 1
 # rocks: 4 - 1, 3, 5 ,7
+# gen_depth: 0,4,14,24,34,...
 func _create_map():
+	print(gen_depth)
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
 			if randf() < 0.2:
-#				tilemap.set_cell(x, y, 1)
-				var instance = Gem.instance()
-				add_child(instance)
-				var local_pos = tilemap.map_to_world(Vector2(x, y))
-				instance.position = local_pos
+				_create_gem(x, y)
 			elif randf() < 0.4:
-				var instance = Fuel.instance()
-				add_child(instance)
-				var local_pos = tilemap.map_to_world(Vector2(x, y))
-				instance.position = local_pos
+				_create_fuel(x, y)
 			else:
 				tilemap.set_cell(x, y, \
 					4, false, false, false, Vector2(1, 0))
@@ -91,7 +87,21 @@ func _create_map():
 
 	gen_bottom = gen_bottom + gen_range
 
+func _create_gem(x: int, y: int):
+	var instance = Gem.instance()
+	_create_instance(instance, x, y)
+
+func _create_fuel(x: int, y: int):
+	var instance = Fuel.instance()
+	_create_instance(instance, x, y)
+
+func _create_instance(instance: Node, x: int, y: int):
+	add_child(instance)
+	var local_pos = tilemap.map_to_world(Vector2(x, y))
+	instance.position = local_pos
+
 func check_create_map(depth: int):
 	if depth > gen_bottom - gen_buffer:
+		gen_depth = depth
 		_create_map()
 
