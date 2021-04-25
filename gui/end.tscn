@@ -19,7 +19,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_bottom = -186.0
 custom_fonts/font = SubResource( 2 )
-text = "You Died
+text = "You ran of energy
 Press R to Restart"
 align = 1
 valign = 1

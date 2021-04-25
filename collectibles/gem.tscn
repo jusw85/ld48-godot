@@ -1,12 +1,13 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
+[ext_resource path="res://collectibles/gem.wav" type="AudioStream" id=1]
 [ext_resource path="res://collectibles/gem.gd" type="Script" id=2]
 [ext_resource path="res://collectibles/gem2.png" type="Texture" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 20.0
 
-[sub_resource type="AtlasTexture" id=8]
+[sub_resource type="AtlasTexture" id=2]
 flags = 4
 atlas = ExtResource( 3 )
 region = Rect2( 0, 0, 64, 64 )
@@ -36,9 +37,9 @@ flags = 4
 atlas = ExtResource( 3 )
 region = Rect2( 256, 0, 64, 64 )
 
-[sub_resource type="SpriteFrames" id=2]
+[sub_resource type="SpriteFrames" id=8]
 animations = [ {
-"frames": [ SubResource( 8 ) ],
+"frames": [ SubResource( 2 ) ],
 "loop": false,
 "name": "idle",
 "speed": 5.0
@@ -59,12 +60,17 @@ position = Vector2( 32, 32 )
 shape = SubResource( 1 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Area2D"]
-frames = SubResource( 2 )
+frames = SubResource( 8 )
 animation = "idle"
 playing = true
 
 [node name="Timer" type="Timer" parent="Area2D"]
 
+[node name="Sfx" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 1 )
+bus = "Sfx"
+
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]
 [connection signal="animation_finished" from="Area2D/AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
 [connection signal="timeout" from="Area2D/Timer" to="." method="_on_Timer_timeout"]
+[connection signal="finished" from="Sfx" to="." method="_on_Sfx_finished"]

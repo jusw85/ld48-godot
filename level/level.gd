@@ -18,9 +18,10 @@ const Gem := preload("res://collectibles/gem.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	randomize()
 	_create_map()
 	_calculate_map_bounds()
-	_replace_map_tiles_with_objects()
+#	_replace_map_tiles_with_objects()
 
 
 func _calculate_map_bounds():
@@ -64,8 +65,21 @@ func _replace_map_tiles_with_objects():
 func _create_map():
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
-			tilemap.set_cell(x, y, \
-				4, false, false, false, Vector2(1, 0))
+			if randf() < 0.2:
+#				tilemap.set_cell(x, y, 1)
+				var instance = Gem.instance()
+				add_child(instance)
+				var local_pos = tilemap.map_to_world(Vector2(x, y))
+				instance.position = local_pos
+			elif randf() < 0.4:
+				var instance = Fuel.instance()
+				add_child(instance)
+				var local_pos = tilemap.map_to_world(Vector2(x, y))
+				instance.position = local_pos
+			else:
+				tilemap.set_cell(x, y, \
+					4, false, false, false, Vector2(1, 0))
+
 			soil.set_cell(x, y, \
 				4, false, false, false, Vector2(0, 0))
 
