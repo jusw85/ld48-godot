@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://player/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
@@ -8,6 +8,8 @@
 [ext_resource path="res://player/crumble.wav" type="AudioStream" id=6]
 [ext_resource path="res://player/mask2.png" type="Texture" id=7]
 [ext_resource path="res://player/camera_shake.gd" type="Script" id=8]
+[ext_resource path="res://player/flasher.shader" type="Shader" id=9]
+[ext_resource path="res://player/animated_sprite.gd" type="Script" id=10]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15.6938, 28.7737 )
@@ -15,6 +17,11 @@ extents = Vector2( 15.6938, 28.7737 )
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 4 )
 shader_param/dist = 0.3
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = ExtResource( 9 )
+shader_param/flashAmount = 0.0
+shader_param/flashColour = Color( 1, 1, 1, 1 )
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
@@ -53,8 +60,10 @@ enabled = true
 cast_to = Vector2( -16, 0 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
+material = SubResource( 3 )
 frames = ExtResource( 3 )
 animation = "idle"
+script = ExtResource( 10 )
 
 [node name="PunchSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 5 )
@@ -63,5 +72,11 @@ bus = "Sfx"
 [node name="CrumbleSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 6 )
 bus = "Sfx"
+
+[node name="InvulnTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="FlashTween" type="Tween" parent="."]
 
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]

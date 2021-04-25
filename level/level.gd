@@ -15,11 +15,12 @@ var gen_range := 10
 
 const Fuel := preload("res://collectibles/fuel.tscn")
 const Gem := preload("res://collectibles/gem.tscn")
+const Spike := preload("res://level/spike.tscn")
 
-# fuel, gem, empty, stone(rest)
+# fuel, gem, empty, spike, stone(rest)
 # last val computed
 var tile_prob = [
-	[0.07, 0.02, 0.20, 0.71]
+	[0.07, 0.02, 0.20, 0.40, 0.71]
 ]
 
 var stone_prob = [
@@ -80,6 +81,8 @@ func _create_map():
 				_create_gem(x, y)
 			elif p < tile_prob[idx][0] + tile_prob[idx][1] + tile_prob[idx][2]:
 				pass
+			elif p < tile_prob[idx][0] + tile_prob[idx][1] + tile_prob[idx][2] + tile_prob[idx][3]:
+				_create_spike(x, y)
 			else:
 				p = randf()
 				idx = gen_depth
@@ -111,6 +114,10 @@ func _create_map():
 
 func _create_gem(x: int, y: int):
 	var instance = Gem.instance()
+	_create_instance(instance, x, y)
+
+func _create_spike(x: int, y: int):
+	var instance = Spike.instance()
 	_create_instance(instance, x, y)
 
 func _create_fuel(x: int, y: int):

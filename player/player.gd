@@ -56,6 +56,8 @@ onready var song4 = preload("res://bgm/song4.ogg")
 
 onready var punch_sfx: AudioStreamPlayer = $PunchSfx
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
+onready var invuln_timer: Timer = $InvulnTimer
+onready var flash_tween: Tween = $FlashTween
 
 
 func _ready() -> void:
@@ -270,3 +272,13 @@ func _on_AnimatedSprite_animation_finished():
 		sprite.animation = "idle"
 		state = STATES.IDLE
 
+func damage(dmg: int):
+	if invuln_timer.time_left <= 0:
+		change_fuel(-dmg)
+		invuln_timer.start()
+#		sprite.material.set_shader_param("flashAmount", 1.0)
+		flash_tween.interpolate_method(sprite, "change_flash", 0.0, 1.0, 0.1)
+		flash_tween.start()
+		yield(flash_tween, "tween_all_completed")
+		flash_tween.interpolate_method(sprite, "change_flash", 1.0, 0.0, 0.1)
+		flash_tween.start()
