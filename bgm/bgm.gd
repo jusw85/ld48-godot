@@ -8,9 +8,6 @@ export var transition_type = 1 # TRANS_SINE
 
 var next_song: AudioStream
 
-func next_song(next: AudioStream):
-	next_song = next
-
 func fade_out():
 	tween_out.interpolate_property(self, "volume_db", 0, -80, transition_duration, transition_type, Tween.EASE_IN, 0)
 	tween_out.start()

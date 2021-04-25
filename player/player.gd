@@ -223,6 +223,10 @@ func _try_eat_rock(pos: Vector2) -> bool:
 	return false
 
 func _spawn_rockbreak(tileinfo: TileInfo, num: int) -> void:
+	if xp_level == 2:
+		camera.shake(0.05, 25.0, 5.0)
+	elif xp_level == 3:
+		camera.shake(0.1, 25.0, 10.0)
 	var rb = RockBreak.instance()
 	tilemap.add_child(rb)
 	rb.position = tilemap.map_to_world(tileinfo.grid_pos)

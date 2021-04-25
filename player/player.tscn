@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://player/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
 [ext_resource path="res://player/crumble.wav" type="AudioStream" id=6]
 [ext_resource path="res://player/mask2.png" type="Texture" id=7]
+[ext_resource path="res://player/camera_shake.gd" type="Script" id=8]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15.6938, 28.7737 )
@@ -32,6 +33,7 @@ offset = Vector2( 0, 144 )
 current = true
 limit_left = 0
 limit_right = 1280
+script = ExtResource( 8 )
 
 [node name="Mask" type="Sprite" parent="."]
 material = SubResource( 2 )
