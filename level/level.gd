@@ -35,7 +35,7 @@ func _replace_map_tiles_with_objects():
 		var instance = Fuel.instance()
 		add_child(instance)
 		var local_pos = tilemap.map_to_world(pos)
-		var global_pos = tilemap.to_global(local_pos)
+#		var global_pos = tilemap.to_global(local_pos)
 		instance.position = local_pos
 
 	var gems = tilemap.get_used_cells_by_id(1)
@@ -44,5 +44,5 @@ func _replace_map_tiles_with_objects():
 		var instance = Gem.instance()
 		add_child(instance)
 		var local_pos = tilemap.map_to_world(pos)
-		var global_pos = tilemap.to_global(local_pos)
+#		var global_pos = tilemap.to_global(local_pos)
 		instance.position = local_pos

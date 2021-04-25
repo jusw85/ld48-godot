@@ -19,7 +19,7 @@ func fade_in():
 	tween_in.interpolate_property(self, "volume_db", -80, 0, transition_duration, transition_type, Tween.EASE_IN, 0)
 	tween_in.start()
 
-func _on_TweenOut_tween_completed(object, key):
+func _on_TweenOut_tween_completed(_object, _key):
 	stop()
 	if next_song != null:
 		stream = next_song

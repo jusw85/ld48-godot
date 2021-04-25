@@ -7,7 +7,6 @@ onready var sprite: AnimatedSprite = $Area2D/AnimatedSprite
 
 func _ready():
 	var num_frames = sprite.frames.get_frame_count("flash")
-	var frame = randi() % num_frames
 	sprite.frame = randi() % num_frames
 
 
