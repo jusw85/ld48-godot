@@ -37,6 +37,7 @@ animations = [ {
 
 [node name="Fuel" type="Node2D"]
 script = ExtResource( 2 )
+fuel_pickup_value = 5
 
 [node name="Area2D" type="Area2D" parent="."]
 position = Vector2( 32, 32 )
@@ -49,7 +50,7 @@ shape = SubResource( 1 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Area2D"]
 frames = SubResource( 6 )
 animation = "flash"
-frame = 1
+frame = 2
 playing = true
 
 [node name="Sfx" type="AudioStreamPlayer" parent="."]

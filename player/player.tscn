@@ -13,6 +13,7 @@ extents = Vector2( 15.6938, 28.7737 )
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
 script = ExtResource( 2 )
+xp_to_level = [ 4, 8, 12 ]
 
 [node name="DirectionalInput" type="Node" parent="."]
 script = ExtResource( 1 )
