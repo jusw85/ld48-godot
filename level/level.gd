@@ -20,7 +20,22 @@ const Spike := preload("res://level/spike.tscn")
 # fuel, gem, empty, spike, stone(rest)
 # last val computed
 var tile_prob = [
-	[0.07, 0.02, 0.20, 0.40, 0.71]
+	[0.09, 0.02, 0.20, 0.00, 0.71], \
+	[0.09, 0.02, 0.20, 0.00, 0.61], \
+	[0.09, 0.02, 0.20, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.61], \
+	[0.06, 0.05, 0.20, 0.10, 0.61], \
 ]
 
 var stone_prob = [
@@ -71,6 +86,9 @@ func _create_map():
 #	var total_tiles = gen_range * 15
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
+			if tilemap.get_cell(x, y) > 0:
+				continue
+
 			var p = randf()
 			var idx = gen_depth
 			if gen_depth >= tile_prob.size():
@@ -83,6 +101,7 @@ func _create_map():
 				pass
 			elif p < tile_prob[idx][0] + tile_prob[idx][1] + tile_prob[idx][2] + tile_prob[idx][3]:
 				_create_spike(x, y)
+				tilemap.set_cell(x, y + 1, 4, false, false, false, Vector2(8, 0))
 			else:
 				p = randf()
 				idx = gen_depth

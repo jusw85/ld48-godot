@@ -61,6 +61,7 @@ onready var flash_tween: Tween = $FlashTween
 
 
 func _ready() -> void:
+	sprite.material.set_shader_param("flashAmount", 0.0)
 	mask.material.set_shader_param("dist", 1.0)
 	fuel = start_fuel
 	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
@@ -157,7 +158,7 @@ func _physics_process(_delta) -> void:
 		pos.y += 1
 
 		var tileinfo := _global_pos_to_tileinfo(pos)
-		if tileinfo.tile_id == 4:
+		if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7:
 			punch_sfx.play()
 			change_fuel(-1)
 			state = STATES.PUNCH_D
@@ -201,7 +202,7 @@ func _global_pos_to_tileinfo(pos: Vector2) -> TileInfo:
 
 func _try_eat_rock(pos: Vector2) -> bool:
 	var tileinfo := _global_pos_to_tileinfo(pos)
-	if tileinfo.tile_id == 4:
+	if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7:
 		change_fuel(-1)
 		var rock_id := int(tileinfo.autotile_id.x)
 		var new_rock_id = rock_id - punch_strength[xp_level]
