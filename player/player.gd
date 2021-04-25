@@ -17,6 +17,7 @@ export var walk_speed := 600.0
 export var gravity := 500.0
 export var start_fuel := 30
 export var xp_to_level := [2, 4, 6]
+export var punch_strength := [1, 2, 3, 4]
 
 var fuel: int
 var gem := 0
@@ -181,7 +182,7 @@ func _try_eat_rock(pos: Vector2) -> bool:
 				rock_id == 3:
 				_spawn_rockbreak(tileinfo, rock_id)
 			var new_autotile = tileinfo.autotile_id
-			new_autotile.x -= 1
+			new_autotile.x -= punch_strength[xp_level]
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
 				tileinfo.tile_id, false, false, false, new_autotile)
 		return true
@@ -218,7 +219,7 @@ func _on_AnimatedSprite_animation_finished():
 				rock_id == 3:
 				_spawn_rockbreak(tileinfo, rock_id)
 			var new_autotile = tileinfo.autotile_id
-			new_autotile.x -= 1
+			new_autotile.x -= punch_strength[xp_level]
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
 				tileinfo.tile_id, false, false, false, new_autotile)
 		sprite.animation = "idle"
