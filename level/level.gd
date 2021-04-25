@@ -91,7 +91,7 @@ func _create_map():
 
 	gen_bottom = gen_bottom + gen_range
 
-func check_create_map(grid_pos: Vector2):
-	if grid_pos.y > gen_bottom - gen_buffer:
+func check_create_map(depth: int):
+	if depth > gen_bottom - gen_buffer:
 		_create_map()
 

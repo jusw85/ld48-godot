@@ -12,6 +12,7 @@ var state = STATES.IDLE
 
 signal fuel_changed
 signal gem_changed
+signal depth_changed
 
 export var walk_speed := 600.0
 export var gravity := 500.0
@@ -25,6 +26,7 @@ var xp_level := 0
 var to_del_downpunch: TileInfo
 var cam_left_x: float
 var cam_right_x: float
+var depth := -1
 
 const End := preload("res://gui/end.tscn")
 const RockBreak := preload("res://level/rock_anim.tscn")
@@ -130,8 +132,7 @@ func _physics_process(_delta) -> void:
 	velocity.y = clamp(velocity.y, 0, INF)
 	move_and_slide(velocity)
 
-	var tilemap_grid_pos = tilemap.world_to_map(tilemap.to_local(global_position))
-	level.check_create_map(tilemap_grid_pos)
+	_check_depth()
 
 	if is_grounded and r_cast.is_colliding() and dir.x > 0:
 		var pos := r_cast.get_collision_point()
@@ -171,6 +172,12 @@ func _physics_process(_delta) -> void:
 			sprite.play("idle")
 	_flip_sprite(dir.x)
 
+func _check_depth() -> void:
+	var new_depth = tilemap.world_to_map(tilemap.to_local(global_position)).y
+	if new_depth != depth:
+		depth = new_depth
+		level.check_create_map(depth)
+		emit_signal("depth_changed", depth)
 
 func _global_pos_to_tileinfo(pos: Vector2) -> TileInfo:
 	var tile_info = TileInfo.new()
