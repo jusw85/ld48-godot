@@ -130,6 +130,9 @@ func _physics_process(_delta) -> void:
 	velocity.y = clamp(velocity.y, 0, INF)
 	move_and_slide(velocity)
 
+	var tilemap_grid_pos = tilemap.world_to_map(tilemap.to_local(global_position))
+	level.check_create_map(tilemap_grid_pos)
+
 	if is_grounded and r_cast.is_colliding() and dir.x > 0:
 		var pos := r_cast.get_collision_point()
 		pos.x += 1
@@ -154,7 +157,6 @@ func _physics_process(_delta) -> void:
 			change_fuel(-1)
 			state = STATES.PUNCH_D
 			to_del_downpunch = tileinfo
-			level.check_create_map(tileinfo.grid_pos)
 
 	if state == STATES.DEAD:
 		sprite.play("idle")
