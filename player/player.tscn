@@ -16,7 +16,10 @@ extents = Vector2( 15.6938, 28.7737 )
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 4 )
-shader_param/dist = 0.3
+shader_param/val = 1.0
+shader_param/l = 0.0
+shader_param/r = 0.0
+shader_param/scale = 0.0
 
 [sub_resource type="ShaderMaterial" id=3]
 shader = ExtResource( 9 )

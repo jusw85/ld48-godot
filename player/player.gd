@@ -62,7 +62,10 @@ onready var flash_tween: Tween = $FlashTween
 
 func _ready() -> void:
 	sprite.material.set_shader_param("flashAmount", 0.0)
-	mask.material.set_shader_param("dist", 1.0)
+	mask.material.set_shader_param("val", 1.0)
+	mask.material.set_shader_param("l", log(0.1))
+	mask.material.set_shader_param("r", log(1.0))
+	mask.material.set_shader_param("scale", (log(1.0) - log(0.1)) / (1.0 - 0.0))
 	fuel = start_fuel
 	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
 	cam_right_x = tilemap.to_global(tilemap.map_to_world(level.bounds_max)).x + 64
@@ -180,8 +183,19 @@ func _physics_process(_delta) -> void:
 func _check_depth() -> void:
 	var new_depth = tilemap.world_to_map(tilemap.to_local(global_position)).y
 	if new_depth != depth:
-		var ma = clamp(1.0 - (new_depth / 100.0), 0.1, 1.0)
-		mask.material.set_shader_param("dist", ma)
+#		0 - 160
+#		0.1 - 1.0
+#		var minv = log(0.1)
+#		var maxv = log(1.0)
+#		exp(s)
+#		https://stackoverflow.com/questions/846221/logarithmic-slider
+
+#		var ma = clamp(1.0 - (new_depth / 100.0), 0.1, 1.0)
+#		mask.material.set_shader_param("dist", ma)
+
+		var ma = 1.0 - (new_depth / 160.0)
+		mask.material.set_shader_param("val", ma)
+
 		depth = new_depth
 		level.check_create_map(depth)
 		emit_signal("depth_changed", depth)
