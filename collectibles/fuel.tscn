@@ -50,7 +50,7 @@ shape = SubResource( 1 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Area2D"]
 frames = SubResource( 6 )
 animation = "flash"
-frame = 2
+frame = 3
 playing = true
 
 [node name="Sfx" type="AudioStreamPlayer" parent="."]
