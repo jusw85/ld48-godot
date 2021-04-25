@@ -39,11 +39,11 @@ onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: AnimatedSprite = $AnimatedSprite
 onready var camera: Camera2D = $Camera2D
-const player0 := preload("res://player/player0.tres")
-const player1 := preload("res://player/player1.tres")
-const player2 := preload("res://player/player2.tres")
-const player3 := preload("res://player/player3.tres")
-onready var player_frames = [player0, player1, player2, player3]
+onready var player_frames = [ \
+	preload("res://player/player0.tres"), \
+	preload("res://player/player1.tres"), \
+	preload("res://player/player2.tres"), \
+	preload("res://player/player3.tres")]
 
 
 func _ready() -> void:
