@@ -46,7 +46,9 @@ onready var player_frames = [ \
 	preload("res://player/player2.tres"), \
 	preload("res://player/player3.tres")]
 onready var bgm: AudioStreamPlayer = $"../Bgm"
+onready var song1 = preload("res://bgm/song1.ogg")
 onready var song2 = preload("res://bgm/song2.ogg")
+onready var song3 = preload("res://bgm/song3.ogg")
 
 
 func _ready() -> void:
@@ -70,6 +72,9 @@ func change_gem(val: int):
 		sprite.frames = player_frames[xp_level]
 		if xp_level == 1:
 			bgm.next_song = song2
+			bgm.fade_out()
+		elif xp_level == 2:
+			bgm.next_song = song3
 			bgm.fade_out()
 
 	emit_signal("gem_changed", gem)
