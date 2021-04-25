@@ -22,6 +22,7 @@ var gem := 0
 var to_del_downpunch: TileInfo
 
 const End := preload("res://gui/end.tscn")
+const RockBreak := preload("res://level/rock_anim.tscn")
 
 const Main := preload("res://main.gd")
 onready var game: Main = $"../"
@@ -135,14 +136,27 @@ func _try_eat_rock(pos: Vector2) -> bool:
 		change_fuel(-1)
 		var rock_id := int(tileinfo.autotile_id.x)
 		if rock_id == 1:
+			_spawn_rockbreak(tileinfo, 1)
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
+			if rock_id == 7 or \
+				rock_id == 5 or \
+				rock_id == 3:
+				_spawn_rockbreak(tileinfo, rock_id)
 			var new_autotile = tileinfo.autotile_id
 			new_autotile.x -= 1
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
 				tileinfo.tile_id, false, false, false, new_autotile)
 		return true
 	return false
+
+
+func _spawn_rockbreak(tileinfo: TileInfo, num: int) -> void:
+	var rb = RockBreak.instance()
+	tilemap.add_child(rb)
+	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
+	rb.start("crumble" + str(num))
+
 
 func _flip_sprite(x_input: int) -> void:
 	if x_input > 0:
@@ -159,8 +173,13 @@ func _on_AnimatedSprite_animation_finished():
 		var tileinfo = to_del_downpunch
 		var rock_id := int(tileinfo.autotile_id.x)
 		if rock_id == 1:
+			_spawn_rockbreak(tileinfo, 1)
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
+			if rock_id == 7 or \
+				rock_id == 5 or \
+				rock_id == 3:
+				_spawn_rockbreak(tileinfo, rock_id)
 			var new_autotile = tileinfo.autotile_id
 			new_autotile.x -= 1
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
