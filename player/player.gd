@@ -46,7 +46,6 @@ func _ready() -> void:
 	camera.limit_left = cam_left_x
 	camera.limit_right = cam_right_x
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	if state == STATES.DEAD:
 		if event.is_action_pressed("restart"):
@@ -54,20 +53,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			return
 
-
 func change_gem(val: int):
 	gem += val
 	emit_signal("gem_changed", gem)
-
 
 func change_fuel(val: int):
 	fuel += val
 	fuel = clamp(fuel, 0, INF)
 	emit_signal("fuel_changed", fuel)
-	if fuel <= 0:
-		state = STATES.DEAD
-		$"../GUI".add_child(End.instance())
-
+#	if fuel <= 0:
+#		state = STATES.DEAD
+#		$"../GUI".add_child(End.instance())
 
 func _process(_delta) -> void:
 	if position.x < cam_left_x + 64:
@@ -89,6 +85,12 @@ func _physics_process(_delta) -> void:
 		return
 
 	var is_grounded = ground_cast.is_colliding()
+	if fuel <= 0 and is_grounded:
+		sprite.animation = "idle"
+		state = STATES.DEAD
+		$"../GUI".add_child(End.instance())
+		return
+
 	var dir = dir_input.get_input()
 	if state == STATES.DEAD:
 		dir = Vector2.ZERO
@@ -206,7 +208,3 @@ func _on_AnimatedSprite_animation_finished():
 		sprite.animation = "idle"
 		state = STATES.IDLE
 
-	if fuel <= 0:
-		sprite.animation = "idle"
-		state = STATES.DEAD
-		return
