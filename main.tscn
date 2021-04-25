@@ -20,10 +20,9 @@ position = Vector2( 0, 64 )
 [node name="Player" parent="." instance=ExtResource( 2 )]
 position = Vector2( 32, 32 )
 z_index = 1
+walk_speed = 300.0
 start_fuel = 100
-
-[node name="Mask" parent="Player" index="3"]
-visible = false
+punch_strength = [ 1, 2, 3, 5 ]
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 3 )

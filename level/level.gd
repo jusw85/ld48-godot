@@ -61,7 +61,7 @@ func _calculate_map_bounds():
 # gen_depth normalized: 1,2,3,4
 # gem / fuel / emptytiles / stone
 func _create_map():
-	var total_tiles = gen_range * 15
+#	var total_tiles = gen_range * 15
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
 			var p = randf()
