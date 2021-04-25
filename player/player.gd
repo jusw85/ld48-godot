@@ -51,6 +51,9 @@ onready var song2 = preload("res://bgm/song2.ogg")
 onready var song3 = preload("res://bgm/song3.ogg")
 onready var song4 = preload("res://bgm/song4.ogg")
 
+onready var punch_sfx: AudioStreamPlayer = $PunchSfx
+onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
+
 
 func _ready() -> void:
 	fuel = start_fuel
@@ -131,12 +134,14 @@ func _physics_process(_delta) -> void:
 		var pos := r_cast.get_collision_point()
 		pos.x += 1
 		if _try_eat_rock(pos):
+			punch_sfx.play()
 			state = STATES.PUNCH_R
 
 	if state == STATES.IDLE and is_grounded and l_cast.is_colliding() and dir.x < 0:
 		var pos := l_cast.get_collision_point()
 		pos.x -= 1
 		if _try_eat_rock(pos):
+			punch_sfx.play()
 			state = STATES.PUNCH_R
 
 	if state == STATES.IDLE and is_grounded and dir.y > 0:
@@ -145,6 +150,7 @@ func _physics_process(_delta) -> void:
 
 		var tileinfo := _global_pos_to_tileinfo(pos)
 		if tileinfo.tile_id == 4:
+			punch_sfx.play()
 			change_fuel(-1)
 			state = STATES.PUNCH_D
 			to_del_downpunch = tileinfo
@@ -194,6 +200,7 @@ func _try_eat_rock(pos: Vector2) -> bool:
 			_spawn_rockbreak(tileinfo, 1)
 
 		if new_rock_id < 1:
+			crumble_sfx.play()
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
 			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
@@ -236,6 +243,7 @@ func _on_AnimatedSprite_animation_finished():
 			_spawn_rockbreak(tileinfo, 1)
 
 		if new_rock_id < 1:
+			crumble_sfx.play()
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
 			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
