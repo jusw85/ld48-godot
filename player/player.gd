@@ -173,28 +173,32 @@ func _try_eat_rock(pos: Vector2) -> bool:
 	if tileinfo.tile_id == 4:
 		change_fuel(-1)
 		var rock_id := int(tileinfo.autotile_id.x)
-		if rock_id == 1:
+		var new_rock_id = rock_id - punch_strength[xp_level]
+		if new_rock_id < 7 and 7 <= rock_id:
+			_spawn_rockbreak(tileinfo, 7)
+		if new_rock_id < 5 and 5 <= rock_id:
+			_spawn_rockbreak(tileinfo, 5)
+		if new_rock_id < 3 and 3 <= rock_id:
+			_spawn_rockbreak(tileinfo, 3)
+		if new_rock_id < 1 and 1 <= rock_id:
 			_spawn_rockbreak(tileinfo, 1)
+
+		if new_rock_id < 1:
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
-			if rock_id == 7 or \
-				rock_id == 5 or \
-				rock_id == 3:
-				_spawn_rockbreak(tileinfo, rock_id)
-			var new_autotile = tileinfo.autotile_id
-			new_autotile.x -= punch_strength[xp_level]
+			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
 				tileinfo.tile_id, false, false, false, new_autotile)
 		return true
 	return false
 
-
 func _spawn_rockbreak(tileinfo: TileInfo, num: int) -> void:
 	var rb = RockBreak.instance()
 	tilemap.add_child(rb)
 	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
+	rb.position.x += rand_range(-16, 16)
+	rb.position.y += rand_range(-16, 16)
 	rb.start("crumble" + str(num))
-
 
 func _flip_sprite(x_input: int) -> void:
 	if x_input > 0:
@@ -209,19 +213,25 @@ func _on_AnimatedSprite_animation_finished():
 		state = STATES.IDLE
 	elif sprite.animation == "punchdown":
 		var tileinfo = to_del_downpunch
+
 		var rock_id := int(tileinfo.autotile_id.x)
-		if rock_id == 1:
+		var new_rock_id = rock_id - punch_strength[xp_level]
+		if new_rock_id < 7 and 7 <= rock_id:
+			_spawn_rockbreak(tileinfo, 7)
+		if new_rock_id < 5 and 5 <= rock_id:
+			_spawn_rockbreak(tileinfo, 5)
+		if new_rock_id < 3 and 3 <= rock_id:
+			_spawn_rockbreak(tileinfo, 3)
+		if new_rock_id < 1 and 1 <= rock_id:
 			_spawn_rockbreak(tileinfo, 1)
+
+		if new_rock_id < 1:
 			tilemap.set_cellv(tileinfo.grid_pos, -1)
 		else:
-			if rock_id == 7 or \
-				rock_id == 5 or \
-				rock_id == 3:
-				_spawn_rockbreak(tileinfo, rock_id)
-			var new_autotile = tileinfo.autotile_id
-			new_autotile.x -= punch_strength[xp_level]
+			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
 			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
 				tileinfo.tile_id, false, false, false, new_autotile)
+
 		sprite.animation = "idle"
 		state = STATES.IDLE
 
