@@ -20,12 +20,15 @@ export var start_fuel := 30
 var fuel: int
 var gem := 0
 var to_del_downpunch: TileInfo
+var cam_left_x: float
+var cam_right_x: float
 
 const End := preload("res://gui/end.tscn")
 const RockBreak := preload("res://level/rock_anim.tscn")
 
 const Main := preload("res://main.gd")
 onready var game: Main = $"../"
+onready var level = $"../Level"
 onready var tilemap: TileMap = $"../Level/TileMap"
 const DirectionalInput := preload("res://player/directional_input.gd")
 onready var dir_input: DirectionalInput = $DirectionalInput
@@ -33,10 +36,15 @@ onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: AnimatedSprite = $AnimatedSprite
+onready var camera: Camera2D = $Camera2D
 
 
 func _ready() -> void:
 	fuel = start_fuel
+	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
+	cam_right_x = tilemap.to_global(tilemap.map_to_world(level.bounds_max)).x + 64
+	camera.limit_left = cam_left_x
+	camera.limit_right = cam_right_x
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -60,6 +68,17 @@ func change_fuel(val: int):
 		state = STATES.DEAD
 		$"../GUI".add_child(End.instance())
 
+
+func _process(_delta) -> void:
+	if position.x < cam_left_x + 64:
+		camera.limit_left = position.x - 64
+	else:
+		camera.limit_left = cam_left_x
+
+	if position.x > cam_right_x - 64:
+		camera.limit_right = position.x + 64
+	else:
+		camera.limit_right = cam_right_x
 
 func _physics_process(_delta) -> void:
 	if state == STATES.PUNCH_R:
