@@ -144,6 +144,7 @@ func _physics_process(_delta) -> void:
 			change_fuel(-1)
 			state = STATES.PUNCH_D
 			to_del_downpunch = tileinfo
+			level.check_create_map(tileinfo.grid_pos)
 
 	if state == STATES.DEAD:
 		sprite.play("idle")

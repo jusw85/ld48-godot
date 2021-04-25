@@ -20,11 +20,10 @@ position = Vector2( 0, 4.205 )
 shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
+offset = Vector2( 0, 144 )
 current = true
 limit_left = 0
-limit_top = -192
 limit_right = 1280
-limit_bottom = 2112
 
 [node name="Mask" type="Sprite" parent="."]
 texture = ExtResource( 4 )
