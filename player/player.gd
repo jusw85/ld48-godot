@@ -16,9 +16,11 @@ signal gem_changed
 export var walk_speed := 600.0
 export var gravity := 500.0
 export var start_fuel := 30
+export var xp_to_level := [2, 4, 6]
 
 var fuel: int
 var gem := 0
+var xp_level := 0
 var to_del_downpunch: TileInfo
 var cam_left_x: float
 var cam_right_x: float
@@ -37,6 +39,11 @@ onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: AnimatedSprite = $AnimatedSprite
 onready var camera: Camera2D = $Camera2D
+const player0 := preload("res://player/player0.tres")
+const player1 := preload("res://player/player1.tres")
+const player2 := preload("res://player/player2.tres")
+const player3 := preload("res://player/player3.tres")
+onready var player_frames = [player0, player1, player2, player3]
 
 
 func _ready() -> void:
@@ -55,6 +62,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func change_gem(val: int):
 	gem += val
+	if xp_level < xp_to_level.size() and gem >= xp_to_level[xp_level]:
+		xp_level += 1
+		sprite.frames = player_frames[xp_level]
 	emit_signal("gem_changed", gem)
 
 func change_fuel(val: int):

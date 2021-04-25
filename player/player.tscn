@@ -1,105 +1,12 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://player/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
+[ext_resource path="res://player/player0.tres" type="SpriteFrames" id=3]
 [ext_resource path="res://player/mask.png" type="Texture" id=4]
-[ext_resource path="res://player/person1_ss.png" type="Texture" id=5]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15.6938, 28.7737 )
-
-[sub_resource type="AtlasTexture" id=2]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 448, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=3]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 256, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=4]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 320, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=5]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 384, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=6]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 512, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=7]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 576, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=8]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 640, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=9]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 704, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=10]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 768, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=11]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 832, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=12]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 0, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=13]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 64, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=14]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 128, 0, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=15]
-flags = 4
-atlas = ExtResource( 5 )
-region = Rect2( 192, 0, 64, 64 )
-
-[sub_resource type="SpriteFrames" id=16]
-animations = [ {
-"frames": [ SubResource( 2 ) ],
-"loop": false,
-"name": "idle",
-"speed": 5.0
-}, {
-"frames": [ SubResource( 3 ), SubResource( 4 ), SubResource( 5 ) ],
-"loop": false,
-"name": "punchright",
-"speed": 10.0
-}, {
-"frames": [ SubResource( 6 ), SubResource( 7 ), SubResource( 8 ), SubResource( 9 ), SubResource( 10 ), SubResource( 11 ) ],
-"loop": false,
-"name": "punchdown",
-"speed": 10.0
-}, {
-"frames": [ SubResource( 12 ), SubResource( 13 ), SubResource( 14 ), SubResource( 15 ) ],
-"loop": true,
-"name": "walking",
-"speed": 10.0
-} ]
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
@@ -136,7 +43,7 @@ enabled = true
 cast_to = Vector2( -16, 0 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
-frames = SubResource( 16 )
+frames = ExtResource( 3 )
 animation = "idle"
 
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
