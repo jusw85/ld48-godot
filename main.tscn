@@ -22,7 +22,7 @@ position = Vector2( 0, 64 )
 position = Vector2( 0, 64 )
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
-position = Vector2( 96, 32 )
+position = Vector2( 32, 32 )
 z_index = 1
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]
