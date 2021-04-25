@@ -37,5 +37,3 @@ script = ExtResource( 7 )
 [connection signal="fuel_changed" from="Player" to="GUI/HUD" method="_on_Player_fuel_changed"]
 [connection signal="gem_changed" from="Player" to="GUI/HUD" method="_on_Player_gem_changed"]
 [connection signal="tween_completed" from="Bgm/TweenOut" to="Bgm" method="_on_TweenOut_tween_completed"]
-
-[editable path="Player"]

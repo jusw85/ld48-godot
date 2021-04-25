@@ -273,12 +273,15 @@ func _on_AnimatedSprite_animation_finished():
 		state = STATES.IDLE
 
 func damage(dmg: int):
+	if state == STATES.DEAD:
+		return
 	if invuln_timer.time_left <= 0:
 		change_fuel(-dmg)
 		invuln_timer.start()
-#		sprite.material.set_shader_param("flashAmount", 1.0)
-		flash_tween.interpolate_method(sprite, "change_flash", 0.0, 1.0, 0.1)
-		flash_tween.start()
-		yield(flash_tween, "tween_all_completed")
-		flash_tween.interpolate_method(sprite, "change_flash", 1.0, 0.0, 0.1)
-		flash_tween.start()
+		while invuln_timer.time_left > 0:
+			flash_tween.interpolate_method(sprite, "change_flash", 0.0, 1.0, 0.25)
+			flash_tween.start()
+			yield(flash_tween, "tween_all_completed")
+			flash_tween.interpolate_method(sprite, "change_flash", 1.0, 0.0, 0.25)
+			flash_tween.start()
+			yield(flash_tween, "tween_all_completed")
