@@ -193,7 +193,7 @@ func _check_depth() -> void:
 #		var ma = clamp(1.0 - (new_depth / 100.0), 0.1, 1.0)
 #		mask.material.set_shader_param("dist", ma)
 
-		var ma = 1.0 - (new_depth / 160.0)
+		var ma = clamp(1.0 - (new_depth / 160.0), 0.0, 1.0)
 		mask.material.set_shader_param("val", ma)
 
 		depth = new_depth
