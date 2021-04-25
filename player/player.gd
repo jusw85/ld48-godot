@@ -41,6 +41,7 @@ onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: AnimatedSprite = $AnimatedSprite
+onready var mask: Sprite = $Mask
 onready var camera: Camera2D = $Camera2D
 onready var player_frames = [ \
 	preload("res://player/player0.tres"), \
@@ -58,6 +59,7 @@ onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 
 
 func _ready() -> void:
+	mask.material.set_shader_param("dist", 1.0)
 	fuel = start_fuel
 	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
 	cam_right_x = tilemap.to_global(tilemap.map_to_world(level.bounds_max)).x + 64
@@ -175,6 +177,8 @@ func _physics_process(_delta) -> void:
 func _check_depth() -> void:
 	var new_depth = tilemap.world_to_map(tilemap.to_local(global_position)).y
 	if new_depth != depth:
+		var ma = clamp(1.0 - (new_depth / 100.0), 0.1, 1.0)
+		mask.material.set_shader_param("dist", ma)
 		depth = new_depth
 		level.check_create_map(depth)
 		emit_signal("depth_changed", depth)

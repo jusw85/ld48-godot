@@ -1,14 +1,19 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://player/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
 [ext_resource path="res://player/player0.tres" type="SpriteFrames" id=3]
-[ext_resource path="res://player/mask.png" type="Texture" id=4]
+[ext_resource path="res://player/mask.shader" type="Shader" id=4]
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
 [ext_resource path="res://player/crumble.wav" type="AudioStream" id=6]
+[ext_resource path="res://player/mask2.png" type="Texture" id=7]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15.6938, 28.7737 )
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = ExtResource( 4 )
+shader_param/dist = 0.3
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
@@ -29,7 +34,8 @@ limit_left = 0
 limit_right = 1280
 
 [node name="Mask" type="Sprite" parent="."]
-texture = ExtResource( 4 )
+material = SubResource( 2 )
+texture = ExtResource( 7 )
 
 [node name="GroundCast" type="RayCast2D" parent="."]
 position = Vector2( 0, 30 )
