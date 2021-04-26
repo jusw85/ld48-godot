@@ -29,7 +29,7 @@ const Trap2 := preload("res://level/premade/trap2.tscn")
 var trap2_tilemap
 var trap2_rect
 
-# fuel, gem, empty, spike, trap, stone(rest)
+# fuel, gem, empty, spike, trap1, trap2, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
 	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71], \
@@ -38,16 +38,16 @@ var tile_prob = [
 	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
 	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
 	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.01, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.02, 0.02, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.02, 0.02, 0.61], \
-	[0.06, 0.05, 0.20, 0.10, 0.02, 0.02, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.006, 0.004, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61], \
+	[0.06, 0.05, 0.20, 0.10, 0.009, 0.006, 0.61], \
 ]
 
 var stone_prob = [
@@ -171,6 +171,17 @@ func _create_map():
 				_create_instance(Spike.instance(), x, y)
 			elif tile_id == 8:
 				tilemap.set_cell(x, y, -1)
+			elif tile_id == 9:
+				tilemap.set_cell(x, y, -1)
+				var p = randf()
+				if p < cur_stone_prob[0]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
+				elif p < cur_stone_prob[1]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
+				elif p < cur_stone_prob[2]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
+				else:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
 
 
 	for y in range(gen_bottom, gen_bottom + gen_range):

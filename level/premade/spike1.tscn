@@ -7,4 +7,4 @@
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = ExtResource( 1 )
 format = 1
-tile_data = PoolIntArray( 0, 6, 0, 65536, 4, 8 )
+tile_data = PoolIntArray( 0, 6, 0, 65536, 4, 8, 65537, 9, 0 )
