@@ -50,12 +50,17 @@ shape = SubResource( 1 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Area2D"]
 frames = SubResource( 6 )
 animation = "flash"
-frame = 3
+frame = 2
 playing = true
 
 [node name="Sfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 1 )
 bus = "Sfx"
 
+[node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="."]
+position = Vector2( 32, 96 )
+rect = Rect2( -25, -10, 50, 20 )
+
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]
 [connection signal="finished" from="Sfx" to="." method="_on_Sfx_finished"]
+[connection signal="screen_exited" from="VisibilityNotifier2D" to="." method="_on_VisibilityNotifier2D_screen_exited"]

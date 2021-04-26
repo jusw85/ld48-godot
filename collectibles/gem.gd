@@ -33,3 +33,7 @@ func _on_AnimatedSprite_animation_finished():
 
 func _on_Sfx_finished():
 	queue_free()
+
+
+func _on_VisibilityNotifier2D_screen_exited():
+	queue_free()
