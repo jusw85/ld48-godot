@@ -25,25 +25,29 @@ const Trap1 := preload("res://level/premade/trap1.tscn")
 var trap1_tilemap
 var trap1_rect
 
-# fuel, gem, empty, spike, stone(rest)
+const Trap2 := preload("res://level/premade/trap2.tscn")
+var trap2_tilemap
+var trap2_rect
+
+# fuel, gem, empty, spike, trap, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.71], \
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.61], \
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.01, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.02, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.02, 0.61], \
-	[0.06, 0.05, 0.20, 0.10, 0.02, 0.61], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.01, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.01, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.02, 0.02, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.02, 0.02, 0.61], \
+	[0.06, 0.05, 0.20, 0.10, 0.02, 0.02, 0.61], \
 ]
 
 var stone_prob = [
@@ -82,6 +86,8 @@ func _ready():
 	spike1_rect = spike1_tilemap.get_used_rect()
 	trap1_tilemap = Trap1.instance().get_node("TileMap")
 	trap1_rect = trap1_tilemap.get_used_rect()
+	trap2_tilemap = Trap2.instance().get_node("TileMap")
+	trap2_rect = trap2_tilemap.get_used_rect()
 
 	_create_map()
 	_calculate_map_bounds()
@@ -135,6 +141,9 @@ func _create_map():
 				continue
 			elif p < cur_tile_prob[4] and _can_spawn(trap1_rect, x, y):
 				_spawn_premade(trap1_tilemap, trap1_rect, x, y)
+				continue
+			elif p < cur_tile_prob[5] and _can_spawn(trap2_rect, x, y):
+				_spawn_premade(trap2_tilemap, trap2_rect, x, y)
 				continue
 			else:
 				p = randf()
