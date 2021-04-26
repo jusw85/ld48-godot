@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://player/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://player/camera_shake.gd" type="Script" id=8]
 [ext_resource path="res://player/flasher.shader" type="Shader" id=9]
 [ext_resource path="res://player/animated_sprite.gd" type="Script" id=10]
+[ext_resource path="res://player/mask.gd" type="Script" id=11]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15.6938, 28.7737 )
@@ -45,6 +46,7 @@ script = ExtResource( 8 )
 [node name="Mask" type="Sprite" parent="."]
 material = SubResource( 2 )
 texture = ExtResource( 7 )
+script = ExtResource( 11 )
 
 [node name="GroundCast" type="RayCast2D" parent="."]
 position = Vector2( 0, 30 )
@@ -78,5 +80,14 @@ wait_time = 2.0
 one_shot = true
 
 [node name="FlashTween" type="Tween" parent="."]
+
+[node name="MaskTween" type="Tween" parent="."]
+
+[node name="CameraTween" type="Tween" parent="."]
+
+[node name="Mask2" type="Sprite" parent="."]
+visible = false
+modulate = Color( 0.952941, 0.2, 0.0784314, 0.270588 )
+texture = ExtResource( 7 )
 
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]

@@ -29,6 +29,7 @@ var cam_right_x: float
 var depth := -1
 
 const End := preload("res://gui/end.tscn")
+const End2 := preload("res://gui/end2.tscn")
 const RockBreak := preload("res://level/rock_anim.tscn")
 
 const Main := preload("res://main.gd")
@@ -127,7 +128,13 @@ func _physics_process(_delta) -> void:
 	if fuel <= 0 and is_grounded:
 		sprite.animation = "idle"
 		state = STATES.DEAD
-		$"../GUI".add_child(End.instance())
+		if not is_hell:
+			$"../GUI".add_child(End.instance())
+		else:
+			var end2_inst = End2.instance()
+			var label = end2_inst.get_node("Label")
+			label.text = "You found " + str(gem) + " gems...\nbut at what cost?\n\nPress R to Restart"
+			$"../GUI".add_child(end2_inst)
 		return
 
 	var dir = dir_input.get_input()
@@ -181,6 +188,8 @@ func _physics_process(_delta) -> void:
 	_flip_sprite(dir.x)
 
 func _check_depth() -> void:
+	if is_hell:
+		return
 	var new_depth = tilemap.world_to_map(tilemap.to_local(global_position)).y
 	if new_depth != depth:
 #		0 - 160
@@ -300,3 +309,17 @@ func damage(dmg: int):
 			flash_tween.interpolate_method(sprite, "change_flash", 1.0, 0.0, 0.25)
 			flash_tween.start()
 			yield(flash_tween, "tween_all_completed")
+
+var is_hell = false
+func do_hell():
+	is_hell = true
+	emit_signal("depth_changed", 665)
+	$Mask2.visible = true
+#	mask.material.set_shader_param("size", 1.0)
+	var mask_tween = $MaskTween
+	mask_tween.interpolate_method(mask, "change_size", mask.material.get_shader_param("size"), 1.0, 0.25)
+	mask_tween.start()
+
+	var camera_tween = $CameraTween
+	camera_tween.interpolate_property(camera, "offset:y", null, -144.0, 0.15)
+	camera_tween.start()

@@ -29,6 +29,11 @@ const Trap2 := preload("res://level/premade/trap2.tscn")
 var trap2_tilemap
 var trap2_rect
 
+const Hell := preload("res://level/premade/hell.tscn")
+var hell_inst
+var hell_tilemap
+var hell_rect
+
 # fuel, gem, empty, spike, trap1, trap2, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
@@ -88,6 +93,10 @@ func _ready():
 	trap1_rect = trap1_tilemap.get_used_rect()
 	trap2_tilemap = Trap2.instance().get_node("TileMap")
 	trap2_rect = trap2_tilemap.get_used_rect()
+
+	hell_inst = Hell.instance()
+	hell_tilemap = hell_inst.get_node("TileMap")
+	hell_rect = hell_tilemap.get_used_rect()
 
 	_create_map()
 	_calculate_map_bounds()
@@ -185,10 +194,8 @@ func _create_map():
 
 
 	for y in range(gen_bottom, gen_bottom + gen_range):
-		border.set_cell(-1, y, \
-			4, false, false, false, Vector2(8, 0))
-		border.set_cell(15, y, \
-			4, false, false, false, Vector2(8, 0))
+		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
+		border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
 
 	gen_bottom = gen_bottom + gen_range
 
@@ -215,11 +222,33 @@ func _create_instance(instance: Node, x: int, y: int):
 
 # first = range - buffer + 1
 # step = range
+var is_hell = false
 func check_create_map(depth: int):
+	if is_hell:
+		return
 	if depth > gen_bottom - gen_buffer:
 		depth =  (depth + gen_buffer - 1) / gen_range
-		gen_depth = depth
-		_create_map()
+		if depth < 30:
+			gen_depth = depth
+			_create_map()
+		else:
+			is_hell = true
+			_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
+			hell_inst.remove_child(hell_tilemap);
+			_create_instance(hell_inst, 0, gen_bottom)
+			for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
+				border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
+				border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
+				for x in range(0, 15):
+					soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
+
+					var tile_id = tilemap.get_cell(x, y)
+					if tile_id == 6:
+						tilemap.set_cell(x, y, -1)
+						var spike_inst = Spike.instance()
+						spike_inst.dmg = 30
+						_create_instance(spike_inst, x, y)
+
 
 #func _replace_map_tiles_with_objects():
 #	var fuels = tilemap.get_used_cells_by_id(0)
