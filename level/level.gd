@@ -17,6 +17,8 @@ const Fuel := preload("res://collectibles/fuel.tscn")
 const Gem := preload("res://collectibles/gem.tscn")
 const Spike := preload("res://level/spike.tscn")
 
+const Trap := preload("res://level/trap.tscn")
+
 # fuel, gem, empty, spike, stone(rest)
 # last val computed
 var tile_prob = [
