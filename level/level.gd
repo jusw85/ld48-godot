@@ -18,26 +18,32 @@ const Gem := preload("res://collectibles/gem.tscn")
 const Spike := preload("res://level/spike.tscn")
 
 const Spike1 := preload("res://level/premade/spike1.tscn")
+var spike1_tilemap
+var spike1_rect
+
+const Trap1 := preload("res://level/premade/trap1.tscn")
+var trap1_tilemap
+var trap1_rect
 
 # fuel, gem, empty, spike, stone(rest)
-# last val computed
+# last val is remaining, doesn't need to be correct
 var tile_prob = [
-	[0.09, 0.02, 0.20, 0.00, 0.71], \
-	[0.09, 0.02, 0.20, 0.00, 0.61], \
-	[0.09, 0.02, 0.20, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.61], \
-	[0.06, 0.05, 0.20, 0.10, 0.61], \
+	[0.09, 0.02, 0.05, 0.00, 0.00, 0.71], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.61], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
+	[0.07, 0.04, 0.20, 0.04, 0.01, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.03, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.03, 0.61], \
+	[0.06, 0.05, 0.20, 0.06, 0.03, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.04, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.04, 0.61], \
+	[0.06, 0.05, 0.20, 0.08, 0.04, 0.61], \
+	[0.06, 0.05, 0.20, 0.10, 0.04, 0.61], \
 ]
 
 var stone_prob = [
@@ -70,9 +76,15 @@ func _ready():
 	for row in stone_prob_cum:
 		for x in range(1, row.size()):
 			row[x] = row[x-1] + row[x]
+
+#	_replace_map_tiles_with_objects()
+	spike1_tilemap = Spike1.instance().get_node("TileMap")
+	spike1_rect = spike1_tilemap.get_used_rect()
+	trap1_tilemap = Trap1.instance().get_node("TileMap")
+	trap1_rect = trap1_tilemap.get_used_rect()
+
 	_create_map()
 	_calculate_map_bounds()
-#	_replace_map_tiles_with_objects()
 
 
 func _calculate_map_bounds():
@@ -101,11 +113,14 @@ func _create_map():
 	var idx = int(clamp(gen_depth, 0, tile_prob_cum.size() - 1))
 	var idx2 = int(clamp(gen_depth, 0, stone_prob_cum.size() - 1))
 	var cur_tile_prob = tile_prob_cum[idx]
-	var cur_stone_prob = stone_prob_cum[idx]
+	var cur_stone_prob = stone_prob_cum[idx2]
 
 	for y in range(gen_bottom, gen_bottom + gen_range):
-		for x in range(0, 15):
+		var x = 0
+		while x < 15:
+			soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
 			if tilemap.get_cell(x, y) > 0:
+				x += 1
 				continue
 
 			var p = randf()
@@ -115,9 +130,12 @@ func _create_map():
 				tilemap.set_cell(x, y, 1)
 			elif p < cur_tile_prob[2]:
 				pass
-			elif p < cur_tile_prob[3]:
-				tilemap.set_cell(x, y, 6)
-				tilemap.set_cell(x, y + 1, 4, false, false, false, Vector2(8, 0))
+			elif p < cur_tile_prob[3] and _can_spawn(spike1_rect, x, y):
+				_spawn_premade(spike1_tilemap, spike1_rect, x, y)
+				continue
+			elif p < cur_tile_prob[4] and _can_spawn(trap1_rect, x, y):
+				_spawn_premade(trap1_tilemap, trap1_rect, x, y)
+				continue
 			else:
 				p = randf()
 				if p < cur_stone_prob[0]:
@@ -128,9 +146,7 @@ func _create_map():
 					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
 				else:
 					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
-
-			soil.set_cell(x, y, \
-				4, false, false, false, Vector2(0, 0))
+			x += 1
 
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
@@ -153,6 +169,22 @@ func _create_map():
 			4, false, false, false, Vector2(8, 0))
 
 	gen_bottom = gen_bottom + gen_range
+
+func _can_spawn(rect: Rect2, x: int, y: int) -> bool:
+	if (x + rect.size.x - 1) >= 15:
+		return false
+	for y1 in int(rect.end.y):
+		for x1 in int(rect.end.x):
+			if tilemap.get_cell(x + x1, y + y1) > 0:
+				return false
+	return true
+
+func _spawn_premade(inst_tilemap: TileMap, rect: Rect2, x: int, y: int):
+	for y1 in int(rect.end.y):
+		for x1 in int(rect.end.x):
+			var id1 = inst_tilemap.get_cell(x1, y1)
+			var auto1 = inst_tilemap.get_cell_autotile_coord(x1, y1)
+			tilemap.set_cell(x + x1, y + y1, id1, false, false, false, auto1)
 
 func _create_instance(instance: Node, x: int, y: int):
 	add_child(instance)
