@@ -62,10 +62,10 @@ onready var flash_tween: Tween = $FlashTween
 
 func _ready() -> void:
 	sprite.material.set_shader_param("flashAmount", 0.0)
-	mask.material.set_shader_param("val", 1.0)
-	mask.material.set_shader_param("l", log(0.1))
-	mask.material.set_shader_param("r", log(1.0))
-	mask.material.set_shader_param("scale", (log(1.0) - log(0.1)) / (1.0 - 0.0))
+	mask.material.set_shader_param("size", 1.0)
+#	mask.material.set_shader_param("l", log(0.1))
+#	mask.material.set_shader_param("r", log(1.0))
+#	mask.material.set_shader_param("scale", (log(1.0) - log(0.1)) / (1.0 - 0.0))
 	fuel = start_fuel
 	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
 	cam_right_x = tilemap.to_global(tilemap.map_to_world(level.bounds_max)).x + 64
@@ -194,7 +194,7 @@ func _check_depth() -> void:
 #		mask.material.set_shader_param("dist", ma)
 
 		var ma = clamp(1.0 - (new_depth / 160.0), 0.0, 1.0)
-		mask.material.set_shader_param("val", ma)
+		mask.material.set_shader_param("size", ma)
 
 		depth = new_depth
 		level.check_create_map(depth)
