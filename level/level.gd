@@ -17,7 +17,7 @@ const Fuel := preload("res://collectibles/fuel.tscn")
 const Gem := preload("res://collectibles/gem.tscn")
 const Spike := preload("res://level/spike.tscn")
 
-const Trap := preload("res://level/trap.tscn")
+const Spike1 := preload("res://level/premade/spike1.tscn")
 
 # fuel, gem, empty, spike, stone(rest)
 # last val computed
@@ -55,9 +55,21 @@ var stone_prob = [
 	[0.05, 0.05, 0.40, 0.50], \
 ]
 
+var tile_prob_cum
+var stone_prob_cum
+
 # feature: create premade vaults
 func _ready():
 	randomize()
+	tile_prob_cum = tile_prob.duplicate(true)
+	for row in tile_prob_cum:
+		for x in range(1, row.size()):
+			row[x] = row[x-1] + row[x]
+
+	stone_prob_cum = stone_prob.duplicate(true)
+	for row in stone_prob_cum:
+		for x in range(1, row.size()):
+			row[x] = row[x-1] + row[x]
 	_create_map()
 	_calculate_map_bounds()
 #	_replace_map_tiles_with_objects()
@@ -86,44 +98,53 @@ func _calculate_map_bounds():
 # gem / fuel / emptytiles / stone
 func _create_map():
 #	var total_tiles = gen_range * 15
+	var idx = int(clamp(gen_depth, 0, tile_prob_cum.size() - 1))
+	var idx2 = int(clamp(gen_depth, 0, stone_prob_cum.size() - 1))
+	var cur_tile_prob = tile_prob_cum[idx]
+	var cur_stone_prob = stone_prob_cum[idx]
+
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		for x in range(0, 15):
 			if tilemap.get_cell(x, y) > 0:
 				continue
 
 			var p = randf()
-			var idx = gen_depth
-			if gen_depth >= tile_prob.size():
-				idx = tile_prob.size() - 1
-			if p < tile_prob[idx][0]:
-				_create_fuel(x, y)
-			elif p < tile_prob[idx][0] + tile_prob[idx][1]:
-				_create_gem(x, y)
-			elif p < tile_prob[idx][0] + tile_prob[idx][1] + tile_prob[idx][2]:
+			if p < cur_tile_prob[0]:
+				tilemap.set_cell(x, y, 0)
+			elif p < cur_tile_prob[1]:
+				tilemap.set_cell(x, y, 1)
+			elif p < cur_tile_prob[2]:
 				pass
-			elif p < tile_prob[idx][0] + tile_prob[idx][1] + tile_prob[idx][2] + tile_prob[idx][3]:
-				_create_spike(x, y)
+			elif p < cur_tile_prob[3]:
+				tilemap.set_cell(x, y, 6)
 				tilemap.set_cell(x, y + 1, 4, false, false, false, Vector2(8, 0))
 			else:
 				p = randf()
-				idx = gen_depth
-				if gen_depth >= stone_prob.size():
-					idx = stone_prob.size() - 1
-				if p < stone_prob[idx][0]:
-					tilemap.set_cell(x, y, \
-						4, false, false, false, Vector2(1, 0))
-				elif p < stone_prob[idx][0] + stone_prob[idx][1]:
-					tilemap.set_cell(x, y, \
-						4, false, false, false, Vector2(3, 0))
-				elif p < stone_prob[idx][0] + stone_prob[idx][1] + stone_prob[idx][2]:
-					tilemap.set_cell(x, y, \
-						4, false, false, false, Vector2(5, 0))
+				if p < cur_stone_prob[0]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
+				elif p < cur_stone_prob[1]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
+				elif p < cur_stone_prob[2]:
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
 				else:
-					tilemap.set_cell(x, y, \
-						4, false, false, false, Vector2(7, 0))
+					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
 
 			soil.set_cell(x, y, \
 				4, false, false, false, Vector2(0, 0))
+
+	for y in range(gen_bottom, gen_bottom + gen_range):
+		for x in range(0, 15):
+			var tile_id = tilemap.get_cell(x, y)
+			if tile_id == 0:
+				tilemap.set_cell(x, y, -1)
+				_create_instance(Fuel.instance(), x, y)
+			elif tile_id == 1:
+				tilemap.set_cell(x, y, -1)
+				_create_instance(Gem.instance(), x, y)
+			elif tile_id == 6:
+				tilemap.set_cell(x, y, -1)
+				_create_instance(Spike.instance(), x, y)
+
 
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		border.set_cell(-1, y, \
@@ -133,23 +154,10 @@ func _create_map():
 
 	gen_bottom = gen_bottom + gen_range
 
-func _create_gem(x: int, y: int):
-	var instance = Gem.instance()
-	_create_instance(instance, x, y)
-
-func _create_spike(x: int, y: int):
-	var instance = Spike.instance()
-	_create_instance(instance, x, y)
-
-func _create_fuel(x: int, y: int):
-	var instance = Fuel.instance()
-	_create_instance(instance, x, y)
-
 func _create_instance(instance: Node, x: int, y: int):
 	add_child(instance)
 	var local_pos = tilemap.map_to_world(Vector2(x, y))
 	instance.position = local_pos
-
 
 # first = range - buffer + 1
 # step = range

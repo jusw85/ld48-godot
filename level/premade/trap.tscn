@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://level/soil_tilemap2.tres" type="TileSet" id=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = ExtResource( 2 )
+format = 1
+tile_data = PoolIntArray( 65536, 7, 0, 65537, 6, 0, 65538, 6, 0, 65539, 6, 0, 65540, 7, 4, 131072, 4, 8, 131073, 4, 8, 131074, 4, 8, 131075, 4, 8, 131076, 4, 8 )
