@@ -33,7 +33,7 @@ const End2 := preload("res://gui/end2.tscn")
 const RockBreak := preload("res://level/rock_anim.tscn")
 
 const Main := preload("res://main.gd")
-onready var game: Main = $"../"
+onready var game = $"../"
 onready var level = $"../Level"
 onready var tilemap: TileMap = $"../Level/TileMap"
 const DirectionalInput := preload("res://player/directional_input.gd")
