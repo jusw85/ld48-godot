@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://common/audio_fader.gd" type="Script" id=1]
+
+[node name="AudioFader" type="Node"]
+script = ExtResource( 1 )
+
+[node name="FadeInTween" type="Tween" parent="."]
+
+[node name="FadeOutTween" type="Tween" parent="."]

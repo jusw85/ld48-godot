@@ -1,6 +1,8 @@
 extends KinematicBody2D
 
 
+# setget
+
 class TileInfo:
 	var grid_pos: Vector2
 	var tile_id: int
@@ -13,6 +15,7 @@ var state = STATES.IDLE
 signal fuel_changed
 signal gem_changed
 signal depth_changed
+signal level_changed(level)
 
 export var walk_speed := 600.0
 export var gravity := 500.0
@@ -85,15 +88,7 @@ func change_gem(val: int):
 	if xp_level < xp_to_level.size() and gem >= xp_to_level[xp_level]:
 		xp_level += 1
 		sprite.frames = player_frames[xp_level]
-		if xp_level == 1:
-			bgm.next_song = song2
-			bgm.fade_out()
-		elif xp_level == 2:
-			bgm.next_song = song3
-			bgm.fade_out()
-		elif xp_level == 3:
-			bgm.next_song = song4
-			bgm.fade_out()
+		emit_signal("level_changed", xp_level)
 
 	emit_signal("gem_changed", gem)
 

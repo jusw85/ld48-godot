@@ -1,25 +1,28 @@
 extends AudioStreamPlayer
 
-onready var tween_out = get_node("TweenOut")
-onready var tween_in = get_node("TweenIn")
 
-export var transition_duration = 2.00
-export var transition_type = 1 # TRANS_SINE
+export(Array, AudioStream) var bgms
+var _current_bgm := 0
 
-var next_song: AudioStream
+onready var _audio_fader = $AudioFader
 
-func fade_out():
-	tween_out.interpolate_property(self, "volume_db", 0, -80, transition_duration, transition_type, Tween.EASE_IN, 0)
-	tween_out.start()
 
-func fade_in():
-	tween_in.interpolate_property(self, "volume_db", -80, 0, transition_duration, transition_type, Tween.EASE_IN, 0)
-	tween_in.start()
+func _ready():
+	_play_current_bgm()
 
-func _on_TweenOut_tween_completed(_object, _key):
-	stop()
-	if next_song != null:
-		stream = next_song
+
+func _play_current_bgm():
+	if _current_bgm < bgms.size():
+		stream = bgms[_current_bgm]
 		play()
-		volume_db = 0
-#		fade_in()
+
+
+func _on_Player_level_changed(_level):
+	_audio_fader.fade_out()
+
+
+func _on_FadeOutTween_tween_all_completed():
+	stop()
+	_current_bgm += 1
+	_play_current_bgm()
+	volume_db = 0

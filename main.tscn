@@ -1,11 +1,15 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://gui/gui.tscn" type="PackedScene" id=1]
 [ext_resource path="res://player/player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://bgm/song1.ogg" type="AudioStream" id=3]
-[ext_resource path="res://common/QuitOnAction.tscn" type="PackedScene" id=4]
+[ext_resource path="res://common/quit_on_action.tscn" type="PackedScene" id=4]
 [ext_resource path="res://level/level.tscn" type="PackedScene" id=5]
+[ext_resource path="res://common/audio_fader.tscn" type="PackedScene" id=6]
 [ext_resource path="res://bgm/bgm.gd" type="Script" id=7]
+[ext_resource path="res://bgm/song4.ogg" type="AudioStream" id=8]
+[ext_resource path="res://bgm/song2.ogg" type="AudioStream" id=9]
+[ext_resource path="res://bgm/song3.ogg" type="AudioStream" id=10]
 
 [node name="Main" type="Node2D"]
 
@@ -26,15 +30,16 @@ start_fuel = 100
 punch_strength = [ 1, 2, 3, 5 ]
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]
-stream = ExtResource( 3 )
 autoplay = true
 script = ExtResource( 7 )
+bgms = [ ExtResource( 3 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 8 ) ]
 
-[node name="TweenOut" type="Tween" parent="Bgm"]
-
-[node name="TweenIn" type="Tween" parent="Bgm"]
+[node name="AudioFader" parent="Bgm" instance=ExtResource( 6 )]
 
 [connection signal="depth_changed" from="Player" to="GUI/HUD" method="_on_Player_depth_changed"]
 [connection signal="fuel_changed" from="Player" to="GUI/HUD" method="_on_Player_fuel_changed"]
 [connection signal="gem_changed" from="Player" to="GUI/HUD" method="_on_Player_gem_changed"]
-[connection signal="tween_completed" from="Bgm/TweenOut" to="Bgm" method="_on_TweenOut_tween_completed"]
+[connection signal="level_changed" from="Player" to="Bgm" method="_on_Player_level_changed"]
+[connection signal="tween_all_completed" from="Bgm/AudioFader/FadeOutTween" to="Bgm" method="_on_FadeOutTween_tween_all_completed"]
+
+[editable path="Bgm/AudioFader"]
