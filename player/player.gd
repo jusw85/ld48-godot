@@ -12,9 +12,9 @@ class TileInfo:
 enum STATES {IDLE, DEAD, WALKING, FALLING, PUNCH_R, PUNCH_D}
 var state = STATES.IDLE
 
-signal fuel_changed
-signal gem_changed
-signal depth_changed
+signal fuel_changed(fuel)
+signal gem_changed(gem)
+signal depth_changed(depth)
 signal level_changed(level)
 
 export var walk_speed := 600.0
