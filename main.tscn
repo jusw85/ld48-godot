@@ -29,6 +29,7 @@ position = Vector2( 32, 32 )
 z_index = 1
 walk_speed = 300.0
 start_fuel = 100
+xp_to_level = [ 2, 3, 4 ]
 punch_strength = [ 1, 2, 3, 5 ]
 
 [node name="Bgm" type="AudioStreamPlayer" parent="."]

@@ -1,19 +1,17 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://player/directional_input.gd" type="Script" id=1]
+[ext_resource path="res://common/directional_input.tscn" type="PackedScene" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
 [ext_resource path="res://player/player0.tres" type="SpriteFrames" id=3]
-[ext_resource path="res://player/mask.shader" type="Shader" id=4]
+[ext_resource path="res://player/mask/mask.shader" type="Shader" id=4]
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
-[ext_resource path="res://player/crumble.wav" type="AudioStream" id=6]
-[ext_resource path="res://player/mask2.png" type="Texture" id=7]
+[ext_resource path="res://level/crumble.wav" type="AudioStream" id=6]
+[ext_resource path="res://player/mask/mask.png" type="Texture" id=7]
 [ext_resource path="res://player/camera_shake.gd" type="Script" id=8]
 [ext_resource path="res://player/flasher.shader" type="Shader" id=9]
-[ext_resource path="res://player/animated_sprite.gd" type="Script" id=10]
-[ext_resource path="res://player/mask.gd" type="Script" id=11]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 15.6938, 28.7737 )
+extents = Vector2( 14, 29 )
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 4 )
@@ -21,19 +19,18 @@ shader_param/size = 1.0
 
 [sub_resource type="ShaderMaterial" id=3]
 shader = ExtResource( 9 )
-shader_param/flashAmount = 0.0
-shader_param/flashColour = Color( 1, 1, 1, 1 )
+shader_param/flash_amount = 0.0
+shader_param/flash_colour = Color( 1, 1, 1, 1 )
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
 script = ExtResource( 2 )
 xp_to_level = [ 7, 15, 25 ]
 
-[node name="DirectionalInput" type="Node" parent="."]
-script = ExtResource( 1 )
+[node name="DirectionalInput" parent="." instance=ExtResource( 1 )]
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
-position = Vector2( 0, 4.205 )
+position = Vector2( 0, 3 )
 shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -45,27 +42,31 @@ script = ExtResource( 8 )
 
 [node name="Mask" type="Sprite" parent="."]
 material = SubResource( 2 )
+position = Vector2( -0.176765, 0 )
 texture = ExtResource( 7 )
-script = ExtResource( 11 )
 
 [node name="GroundCast" type="RayCast2D" parent="."]
-position = Vector2( 0, 30 )
+position = Vector2( 0, 32 )
 enabled = true
-cast_to = Vector2( 0, 10 )
+exclude_parent = false
+cast_to = Vector2( 0, 1 )
 
 [node name="RightCast" type="RayCast2D" parent="."]
+position = Vector2( 14, 0 )
 enabled = true
-cast_to = Vector2( 16, 0 )
+exclude_parent = false
+cast_to = Vector2( 1, 0 )
 
 [node name="LeftCast" type="RayCast2D" parent="."]
+position = Vector2( -14, 0 )
 enabled = true
-cast_to = Vector2( -16, 0 )
+exclude_parent = false
+cast_to = Vector2( -1, 0 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 material = SubResource( 3 )
 frames = ExtResource( 3 )
 animation = "idle"
-script = ExtResource( 10 )
 
 [node name="PunchSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 5 )

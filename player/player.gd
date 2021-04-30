@@ -1,21 +1,27 @@
 extends KinematicBody2D
 
 
-# setget
+# lerp global camera
+# move tilemap out
+# fix depth
+# reorder tilemap
+# positional audio for punch
+# tighten controls
+# collectible AOE fly to player
+# dust effect on drop
 
-class TileInfo:
-	var grid_pos: Vector2
-	var tile_id: int
-	var autotile_id: Vector2
-
-
-enum STATES {IDLE, DEAD, WALKING, FALLING, PUNCH_R, PUNCH_D}
-var state = STATES.IDLE
 
 signal fuel_changed(fuel)
 signal gem_changed(gem)
 signal depth_changed(depth)
 signal level_changed(level)
+
+enum States {IDLE, DEAD, WALKING, FALLING, PUNCH_R, PUNCH_D}
+var state = States.IDLE
+
+const End := preload("res://gui/end.tscn")
+const End2 := preload("res://gui/end2.tscn")
+const RockBreak := preload("res://level/rock_anim.tscn")
 
 export var walk_speed := 600.0
 export var gravity := 500.0
@@ -23,24 +29,17 @@ export var start_fuel := 30
 export var xp_to_level := [2, 4, 6]
 export var punch_strength := [1, 2, 3, 4]
 
-var fuel: int
-var gem := 0
+var depth := -1
 var xp_level := 0
-var to_del_downpunch: TileInfo
+var to_del_downpunch: NC.TileMapUtils.TileInfo
 var cam_left_x: float
 var cam_right_x: float
-var depth := -1
 
-const End := preload("res://gui/end.tscn")
-const End2 := preload("res://gui/end2.tscn")
-const RockBreak := preload("res://level/rock_anim.tscn")
-
-const Main := preload("res://main.gd")
-onready var game = $"../"
+onready var gem := 0 setget gem_set
+onready var fuel := start_fuel setget fuel_set
 onready var level = $"../Level"
 onready var tilemap: TileMap = $"../Level/TileMap"
-const DirectionalInput := preload("res://player/directional_input.gd")
-onready var dir_input: DirectionalInput = $DirectionalInput
+onready var directional_input: NC.DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
@@ -52,11 +51,6 @@ onready var player_frames = [ \
 	preload("res://player/player1.tres"), \
 	preload("res://player/player2.tres"), \
 	preload("res://player/player3.tres")]
-onready var bgm: AudioStreamPlayer = $"../Bgm"
-onready var song1 = preload("res://bgm/song1.ogg")
-onready var song2 = preload("res://bgm/song2.ogg")
-onready var song3 = preload("res://bgm/song3.ogg")
-onready var song4 = preload("res://bgm/song4.ogg")
 
 onready var punch_sfx: AudioStreamPlayer = $PunchSfx
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
@@ -65,39 +59,33 @@ onready var flash_tween: Tween = $FlashTween
 
 
 func _ready() -> void:
-	sprite.material.set_shader_param("flashAmount", 0.0)
-	mask.material.set_shader_param("size", 1.0)
-#	mask.material.set_shader_param("l", log(0.1))
-#	mask.material.set_shader_param("r", log(1.0))
-#	mask.material.set_shader_param("scale", (log(1.0) - log(0.1)) / (1.0 - 0.0))
-	fuel = start_fuel
 	cam_left_x = tilemap.to_global(tilemap.map_to_world(level.bounds_min)).x
 	cam_right_x = tilemap.to_global(tilemap.map_to_world(level.bounds_max)).x + 64
 	camera.limit_left = cam_left_x
 	camera.limit_right = cam_right_x
 
+
 func _unhandled_input(event: InputEvent) -> void:
-	if state == STATES.DEAD:
+	if state == States.DEAD:
 		if event.is_action_pressed("restart"):
 			get_tree().reload_current_scene()
 		else:
 			return
 
-func change_gem(val: int):
-	gem += val
+func gem_set(val: int) -> void:
+	gem = int(max(val, 0))
+	emit_signal("gem_changed", gem)
 	if xp_level < xp_to_level.size() and gem >= xp_to_level[xp_level]:
 		xp_level += 1
 		sprite.frames = player_frames[xp_level]
 		emit_signal("level_changed", xp_level)
 
-	emit_signal("gem_changed", gem)
 
-func change_fuel(val: int):
-	fuel += val
-	fuel = clamp(fuel, 0, INF)
+func fuel_set(val: int) -> void:
+	fuel = int(max(val, 0))
 	emit_signal("fuel_changed", fuel)
 #	if fuel <= 0:
-#		state = STATES.DEAD
+#		state = States.DEAD
 #		$"../GUI".add_child(End.instance())
 
 func _process(_delta) -> void:
@@ -112,28 +100,28 @@ func _process(_delta) -> void:
 		camera.limit_right = cam_right_x
 
 func _physics_process(_delta) -> void:
-	if state == STATES.PUNCH_R:
+	if state == States.PUNCH_R:
 		assert(sprite.animation == "punchright")
 		return
-	elif state == STATES.PUNCH_D:
+	elif state == States.PUNCH_D:
 		assert(sprite.animation == "punchdown")
 		return
 
 	var is_grounded = ground_cast.is_colliding()
 	if fuel <= 0 and is_grounded:
 		sprite.animation = "idle"
-		state = STATES.DEAD
+		state = States.DEAD
 		if not is_hell:
-			$"../GUI".add_child(End.instance())
+			$"../GUICanvas".add_child(End.instance())
 		else:
 			var end2_inst = End2.instance()
 			var label = end2_inst.get_node("Label")
 			label.text = "You found " + str(gem) + " gems...\nbut at what cost?\n\nPress R to Restart"
-			$"../GUI".add_child(end2_inst)
+			$"../GUICanvas".add_child(end2_inst)
 		return
 
-	var dir = dir_input.get_input()
-	if state == STATES.DEAD:
+	var dir = directional_input.get_input_direction()
+	if state == States.DEAD:
 		dir = Vector2.ZERO
 
 	var velocity = Vector2()
@@ -147,34 +135,36 @@ func _physics_process(_delta) -> void:
 	if is_grounded and r_cast.is_colliding() and dir.x > 0:
 		var pos := r_cast.get_collision_point()
 		pos.x += 1
-		if _try_eat_rock(pos):
+		if level.try_break_rock(pos, punch_strength[xp_level]):
+			self.fuel -= 1
 			punch_sfx.play()
-			state = STATES.PUNCH_R
+			state = States.PUNCH_R
 
-	if state == STATES.IDLE and is_grounded and l_cast.is_colliding() and dir.x < 0:
+	if state == States.IDLE and is_grounded and l_cast.is_colliding() and dir.x < 0:
 		var pos := l_cast.get_collision_point()
 		pos.x -= 1
-		if _try_eat_rock(pos):
+		if level.try_break_rock(pos, punch_strength[xp_level]):
+			self.fuel -= 1
 			punch_sfx.play()
-			state = STATES.PUNCH_R
+			state = States.PUNCH_R
 
-	if state == STATES.IDLE and is_grounded and dir.y > 0:
+	if state == States.IDLE and is_grounded and dir.y > 0:
 		var pos := ground_cast.get_collision_point()
 		pos.y += 1
 
-		var tileinfo := _global_pos_to_tileinfo(pos)
+		var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, pos)
 		if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7:
 			punch_sfx.play()
-			change_fuel(-1)
-			state = STATES.PUNCH_D
+			self.fuel -= 1
+			state = States.PUNCH_D
 			to_del_downpunch = tileinfo
 
-	if state == STATES.DEAD:
+	if state == States.DEAD:
 		sprite.play("idle")
 	else:
-		if state == STATES.PUNCH_R:
+		if state == States.PUNCH_R:
 			sprite.play("punchright")
-		elif state == STATES.PUNCH_D:
+		elif state == States.PUNCH_D:
 			sprite.play("punchdown")
 		elif is_grounded and velocity.x != 0.0:
 			sprite.play("walking")
@@ -204,56 +194,7 @@ func _check_depth() -> void:
 		level.check_create_map(depth)
 		emit_signal("depth_changed", depth)
 
-func _global_pos_to_tileinfo(pos: Vector2) -> TileInfo:
-	var tile_info = TileInfo.new()
 
-	pos = tilemap.to_local(pos)
-	var grid_pos := tilemap.world_to_map(pos)
-	var tile_id := tilemap.get_cellv(grid_pos)
-	var autotile_id := tilemap.get_cell_autotile_coord(grid_pos.x, grid_pos.y)
-
-	tile_info.grid_pos = grid_pos
-	tile_info.tile_id = tile_id
-	tile_info.autotile_id = autotile_id
-	return tile_info
-
-
-func _try_eat_rock(pos: Vector2) -> bool:
-	var tileinfo := _global_pos_to_tileinfo(pos)
-	if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7:
-		change_fuel(-1)
-		var rock_id := int(tileinfo.autotile_id.x)
-		var new_rock_id = rock_id - punch_strength[xp_level]
-		if new_rock_id < 7 and 7 <= rock_id:
-			_spawn_rockbreak(tileinfo, 7)
-		if new_rock_id < 5 and 5 <= rock_id:
-			_spawn_rockbreak(tileinfo, 5)
-		if new_rock_id < 3 and 3 <= rock_id:
-			_spawn_rockbreak(tileinfo, 3)
-		if new_rock_id < 1 and 1 <= rock_id:
-			_spawn_rockbreak(tileinfo, 1)
-
-		if new_rock_id < 1:
-			crumble_sfx.play()
-			tilemap.set_cellv(tileinfo.grid_pos, -1)
-		else:
-			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
-			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
-				tileinfo.tile_id, false, false, false, new_autotile)
-		return true
-	return false
-
-func _spawn_rockbreak(tileinfo: TileInfo, num: int) -> void:
-	if xp_level == 2:
-		camera.shake(0.05, 25.0, 5.0)
-	elif xp_level == 3:
-		camera.shake(0.1, 25.0, 10.0)
-	var rb = RockBreak.instance()
-	tilemap.add_child(rb)
-	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
-	rb.position.x += rand_range(-16, 16)
-	rb.position.y += rand_range(-16, 16)
-	rb.start("crumble" + str(num))
 
 func _flip_sprite(x_input: int) -> void:
 	if x_input > 0:
@@ -265,7 +206,7 @@ func _flip_sprite(x_input: int) -> void:
 func _on_AnimatedSprite_animation_finished():
 	if sprite.animation == "punchright":
 		sprite.animation = "idle"
-		state = STATES.IDLE
+		state = States.IDLE
 	elif sprite.animation == "punchdown":
 		var tileinfo = to_del_downpunch
 
@@ -289,19 +230,19 @@ func _on_AnimatedSprite_animation_finished():
 				tileinfo.tile_id, false, false, false, new_autotile)
 
 		sprite.animation = "idle"
-		state = STATES.IDLE
+		state = States.IDLE
 
 func damage(dmg: int):
-	if state == STATES.DEAD:
+	if state == States.DEAD:
 		return
 	if invuln_timer.time_left <= 0:
-		change_fuel(-dmg)
+		self.fuel -= dmg
 		invuln_timer.start()
 		while invuln_timer.time_left > 0:
-			flash_tween.interpolate_method(sprite, "change_flash", 0.0, 1.0, 0.25)
+			flash_tween.interpolate_property(sprite.material, "shader_param/flash_amount", 0.0, 1.0, 0.25)
 			flash_tween.start()
 			yield(flash_tween, "tween_all_completed")
-			flash_tween.interpolate_method(sprite, "change_flash", 1.0, 0.0, 0.25)
+			flash_tween.interpolate_property(sprite.material, "shader_param/flash_amount", 1.0, 0.0, 0.25)
 			flash_tween.start()
 			yield(flash_tween, "tween_all_completed")
 
@@ -310,11 +251,23 @@ func do_hell():
 	is_hell = true
 	emit_signal("depth_changed", 665)
 	$Mask2.visible = true
-#	mask.material.set_shader_param("size", 1.0)
 	var mask_tween = $MaskTween
-	mask_tween.interpolate_method(mask, "change_size", mask.material.get_shader_param("size"), 1.0, 0.25)
+	mask_tween.interpolate_property(mask.material, "shader_param/size", mask.material.get_shader_param("size"), 1.0, 0.25)
 	mask_tween.start()
 
 	var camera_tween = $CameraTween
 	camera_tween.interpolate_property(camera, "offset:y", null, -144.0, 0.15)
 	camera_tween.start()
+
+
+func _spawn_rockbreak(tileinfo: NC.TileMapUtils.TileInfo, num: int) -> void:
+	if xp_level == 2:
+		camera.shake(0.05, 25.0, 5.0)
+	elif xp_level == 3:
+		camera.shake(0.1, 25.0, 10.0)
+	var rb = RockBreak.instance()
+	tilemap.add_child(rb)
+	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
+	rb.position.x += rand_range(-16, 16)
+	rb.position.y += rand_range(-16, 16)
+	rb.start("crumble" + str(num))

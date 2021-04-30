@@ -268,3 +268,48 @@ func check_create_map(depth: int):
 #		var local_pos = tilemap.map_to_world(pos)
 ##		var global_pos = tilemap.to_global(local_pos)
 #		instance.position = local_pos
+
+func is_rock(p_global_pos: Vector2) -> bool:
+	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
+	return (tileinfo.tile_id == 4 and
+		tileinfo.autotile_id.x <= 7 and
+		tileinfo.autotile_id.x >= 1)
+
+func try_break_rock(p_global_pos: Vector2, p_dmg: int) -> bool:
+	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
+	if (tileinfo.tile_id == 4 and
+			tileinfo.autotile_id.x <= 7 and
+			tileinfo.autotile_id.x >= 1):
+		var rock_id := int(tileinfo.autotile_id.x)
+		var new_rock_id = rock_id - p_dmg
+		for i in [1, 3, 5, 7]:
+			if i in range(new_rock_id + 1, rock_id + 1):
+				_spawn_rockbreak(tileinfo, i)
+
+		if new_rock_id < 1:
+			crumble_sfx.play()
+			tilemap.set_cellv(tileinfo.grid_pos, -1)
+		else:
+			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
+			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
+				tileinfo.tile_id, false, false, false, new_autotile)
+		return true
+	return false
+
+
+const RockBreak := preload("res://level/rock_anim.tscn")
+ # TODO: positional crumble audio
+onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
+
+func _spawn_rockbreak(tileinfo: NC.TileMapUtils.TileInfo, num: int) -> void:
+	# TODO: fix this shit
+	if $"../Player".xp_level == 2:
+		$"../Player/Camera2D".shake(0.05, 25.0, 5.0)
+	elif $"../Player".xp_level == 3:
+		$"../Player/Camera2D".shake(0.1, 25.0, 10.0)
+	var rb = RockBreak.instance()
+	tilemap.add_child(rb)
+	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
+	rb.position.x += rand_range(-16, 16)
+	rb.position.y += rand_range(-16, 16)
+	rb.start("crumble" + str(num))

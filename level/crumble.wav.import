@@ -2,12 +2,12 @@
 
 importer="wav"
 type="AudioStreamSample"
-path="res://.import/crumble.wav-1fcd053801ac7ce85f5922eff5204acf.sample"
+path="res://.import/crumble.wav-f9eda270a8237898a9b407d30d63da49.sample"
 
 [deps]
 
-source_file="res://player/crumble.wav"
-dest_files=[ "res://.import/crumble.wav-1fcd053801ac7ce85f5922eff5204acf.sample" ]
+source_file="res://level/crumble.wav"
+dest_files=[ "res://.import/crumble.wav-f9eda270a8237898a9b407d30d63da49.sample" ]
 
 [params]
 

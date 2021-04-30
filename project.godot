@@ -9,13 +9,13 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Node",
-"class": "AudioFader",
+"base": "Reference",
+"class": "NC",
 "language": "GDScript",
-"path": "res://common/audio_fader.gd"
+"path": "res://common/namespace.gd"
 } ]
 _global_script_class_icons={
-"AudioFader": ""
+"NC": ""
 }
 
 [application]

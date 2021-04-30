@@ -1,5 +1,4 @@
 # warning-ignore-all:return_value_discarded
-class_name AudioFader
 extends Node
 
 
