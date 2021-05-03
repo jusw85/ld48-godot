@@ -1,7 +1,6 @@
 extends AudioStreamPlayer
 
-
-export(Array, AudioStream) var bgms
+export (Array, AudioStream) var bgms
 var _current_bgm := 0
 
 onready var _audio_fader: NC.AudioFader = $AudioFader

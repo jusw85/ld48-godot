@@ -3,8 +3,7 @@ class TileInfo:
 	var tile_id: int
 	var autotile_id: Vector2
 
-	func _init(p_grid_pos: Vector2, p_tile_id: int,
-			p_autotile_id = Vector2(0.0, 0.0)) -> void:
+	func _init(p_grid_pos: Vector2, p_tile_id: int, p_autotile_id = Vector2(0.0, 0.0)) -> void:
 		self.grid_pos = p_grid_pos
 		self.tile_id = p_tile_id
 		self.autotile_id = p_autotile_id

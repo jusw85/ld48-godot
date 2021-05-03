@@ -1,6 +1,5 @@
 extends Node2D
 
-
 onready var tilemap: TileMap = $TileMap
 onready var border: TileMap = $Border
 onready var soil: TileMap = $Soil
@@ -9,7 +8,7 @@ var bounds_min := Vector2(INF, INF)
 var bounds_max := Vector2(-INF, -INF)
 
 var gen_depth := 0
-var gen_bottom := 0
+var gen_bottom := 1
 var gen_buffer := 7
 var gen_range := 10
 
@@ -37,41 +36,42 @@ var hell_rect
 # fuel, gem, empty, spike, trap1, trap2, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71], \
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61], \
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.006, 0.004, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61], \
-	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61], \
-	[0.06, 0.05, 0.20, 0.10, 0.009, 0.006, 0.61], \
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71],
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
+	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
+	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
+	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
+	[0.06, 0.05, 0.20, 0.08, 0.006, 0.004, 0.61],
+	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61],
+	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61],
+	[0.06, 0.05, 0.20, 0.10, 0.009, 0.006, 0.61],
 ]
 
 var stone_prob = [
-	[0.90, 0.10, 0.00, 0.00], \
-	[0.80, 0.15, 0.05, 0.00], \
-	[0.75, 0.15, 0.05, 0.05], \
-	[0.65, 0.20, 0.10, 0.05], \
-	[0.50, 0.30, 0.10, 0.10], \
-	[0.30, 0.40, 0.15, 0.15], \
-	[0.25, 0.45, 0.15, 0.15], \
-	[0.20, 0.40, 0.20, 0.20], \
-	[0.15, 0.30, 0.30, 0.25], \
-	[0.10, 0.20, 0.40, 0.30], \
-	[0.05, 0.10, 0.45, 0.40], \
-	[0.05, 0.05, 0.40, 0.50], \
+	[0.90, 0.10, 0.00, 0.00],
+	[0.80, 0.15, 0.05, 0.00],
+	[0.75, 0.15, 0.05, 0.05],
+	[0.65, 0.20, 0.10, 0.05],
+	[0.50, 0.30, 0.10, 0.10],
+	[0.30, 0.40, 0.15, 0.15],
+	[0.25, 0.45, 0.15, 0.15],
+	[0.20, 0.40, 0.20, 0.20],
+	[0.15, 0.30, 0.30, 0.25],
+	[0.10, 0.20, 0.40, 0.30],
+	[0.05, 0.10, 0.45, 0.40],
+	[0.05, 0.05, 0.40, 0.50],
 ]
 
 var tile_prob_cum
 var stone_prob_cum
+
 
 # feature: create premade vaults
 func _ready():
@@ -79,12 +79,12 @@ func _ready():
 	tile_prob_cum = tile_prob.duplicate(true)
 	for row in tile_prob_cum:
 		for x in range(1, row.size()):
-			row[x] = row[x-1] + row[x]
+			row[x] = row[x - 1] + row[x]
 
 	stone_prob_cum = stone_prob.duplicate(true)
 	for row in stone_prob_cum:
 		for x in range(1, row.size()):
-			row[x] = row[x-1] + row[x]
+			row[x] = row[x - 1] + row[x]
 
 #	_replace_map_tiles_with_objects()
 	spike1_tilemap = Spike1.instance().get_node("TileMap")
@@ -113,6 +113,9 @@ func _calculate_map_bounds():
 			bounds_min.y = int(pos.y)
 		elif pos.y > bounds_max.y:
 			bounds_max.y = int(pos.y)
+	bounds_min = tilemap.to_global(tilemap.map_to_world(bounds_min))
+	bounds_max = tilemap.to_global(tilemap.map_to_world(bounds_max))
+
 
 
 # 6 down view range
@@ -192,12 +195,12 @@ func _create_map():
 				else:
 					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
 
-
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
 		border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
 
 	gen_bottom = gen_bottom + gen_range
+
 
 func _can_spawn(rect: Rect2, x: int, y: int) -> bool:
 	if (x + rect.size.x - 1) >= 15:
@@ -208,6 +211,7 @@ func _can_spawn(rect: Rect2, x: int, y: int) -> bool:
 				return false
 	return true
 
+
 func _spawn_premade(inst_tilemap: TileMap, rect: Rect2, x: int, y: int):
 	for y1 in int(rect.end.y):
 		for x1 in int(rect.end.x):
@@ -215,26 +219,30 @@ func _spawn_premade(inst_tilemap: TileMap, rect: Rect2, x: int, y: int):
 			var auto1 = inst_tilemap.get_cell_autotile_coord(x1, y1)
 			tilemap.set_cell(x + x1, y + y1, id1, false, false, false, auto1)
 
+
 func _create_instance(instance: Node, x: int, y: int):
 	add_child(instance)
 	var local_pos = tilemap.map_to_world(Vector2(x, y))
 	instance.position = local_pos
 
+
 # first = range - buffer + 1
 # step = range
 var is_hell = false
+
+
 func check_create_map(depth: int):
 	if is_hell:
 		return
 	if depth > gen_bottom - gen_buffer:
-		depth =  (depth + gen_buffer - 1) / gen_range
+		depth = (depth + gen_buffer - 1) / gen_range
 		if depth < 30:
 			gen_depth = depth
 			_create_map()
 		else:
 			is_hell = true
 			_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
-			hell_inst.remove_child(hell_tilemap);
+			hell_inst.remove_child(hell_tilemap)
 			_create_instance(hell_inst, 0, gen_bottom)
 			for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
 				border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
@@ -269,39 +277,78 @@ func check_create_map(depth: int):
 ##		var global_pos = tilemap.to_global(local_pos)
 #		instance.position = local_pos
 
-func is_rock(p_global_pos: Vector2) -> bool:
-	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
-	return (tileinfo.tile_id == 4 and
-		tileinfo.autotile_id.x <= 7 and
-		tileinfo.autotile_id.x >= 1)
 
-func try_break_rock(p_global_pos: Vector2, p_dmg: int) -> bool:
-	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
-	if (tileinfo.tile_id == 4 and
-			tileinfo.autotile_id.x <= 7 and
-			tileinfo.autotile_id.x >= 1):
-		var rock_id := int(tileinfo.autotile_id.x)
-		var new_rock_id = rock_id - p_dmg
-		for i in [1, 3, 5, 7]:
-			if i in range(new_rock_id + 1, rock_id + 1):
-				_spawn_rockbreak(tileinfo, i)
+func get_grid_pos(p_global_pos: Vector2) -> Vector2:
+	var local_pos = tilemap.to_local(p_global_pos)
+	return tilemap.world_to_map(local_pos)
 
-		if new_rock_id < 1:
-			crumble_sfx.play()
-			tilemap.set_cellv(tileinfo.grid_pos, -1)
-		else:
-			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
-			tilemap.set_cell(tileinfo.grid_pos.x, tileinfo.grid_pos.y, \
-				tileinfo.tile_id, false, false, false, new_autotile)
-		return true
-	return false
+
+func is_rock(p_grid_pos: Vector2) -> bool:
+	var tile_id := tilemap.get_cellv(p_grid_pos)
+	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
+	return tile_id == 4 and autotile_id.x <= 7 and autotile_id.x >= 1
+
+
+# use objects for rocks?
+# object destroyer above player
+func break_rock(p_grid_pos: Vector2, p_dmg: int):
+	assert(is_rock(p_grid_pos))
+	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
+	var rock_id := int(autotile_id.x)
+	var new_rock_id = rock_id - p_dmg
+	for i in [1, 3, 5, 7]:
+		if i in range(new_rock_id + 1, rock_id + 1):
+			_spawn_rockbreak(p_grid_pos, i)
+
+	if new_rock_id < 1:
+		crumble_sfx.play()
+		tilemap.set_cellv(p_grid_pos, -1)
+	else:
+		tilemap.set_cell(
+			p_grid_pos.x,
+			p_grid_pos.y,
+			4,
+			false,
+			false,
+			false,
+			Vector2(new_rock_id, 0)
+		)
+	tilemap.update_dirty_quadrants()
+
+
+#func try_break_rock(p_global_pos: Vector2, p_dmg: int) -> bool:
+#	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
+#	if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7 and tileinfo.autotile_id.x >= 1:
+#		var rock_id := int(tileinfo.autotile_id.x)
+#		var new_rock_id = rock_id - p_dmg
+#		for i in [1, 3, 5, 7]:
+#			if i in range(new_rock_id + 1, rock_id + 1):
+#				_spawn_rockbreak(tileinfo, i)
+#
+#		if new_rock_id < 1:
+#			crumble_sfx.play()
+#			tilemap.set_cellv(tileinfo.grid_pos, -1)
+#		else:
+#			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
+#			tilemap.set_cell(
+#				tileinfo.grid_pos.x,
+#				tileinfo.grid_pos.y,
+#				tileinfo.tile_id,
+#				false,
+#				false,
+#				false,
+#				new_autotile
+#			)
+#		return true
+#	return false
 
 
 const RockBreak := preload("res://level/rock_anim.tscn")
- # TODO: positional crumble audio
+# TODO: positional crumble audio
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 
-func _spawn_rockbreak(tileinfo: NC.TileMapUtils.TileInfo, num: int) -> void:
+
+func _spawn_rockbreak(p_grid_pos: Vector2, num: int) -> void:
 	# TODO: fix this shit
 	if $"../Player".xp_level == 2:
 		$"../Player/Camera2D".shake(0.05, 25.0, 5.0)
@@ -309,7 +356,7 @@ func _spawn_rockbreak(tileinfo: NC.TileMapUtils.TileInfo, num: int) -> void:
 		$"../Player/Camera2D".shake(0.1, 25.0, 10.0)
 	var rb = RockBreak.instance()
 	tilemap.add_child(rb)
-	rb.position = tilemap.map_to_world(tileinfo.grid_pos)
+	rb.position = tilemap.map_to_world(p_grid_pos)
 	rb.position.x += rand_range(-16, 16)
 	rb.position.y += rand_range(-16, 16)
 	rb.start("crumble" + str(num))

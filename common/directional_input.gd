@@ -1,6 +1,5 @@
 extends Node
 
-
 export var left_action = "ui_left"
 export var right_action = "ui_right"
 export var up_action = "ui_up"

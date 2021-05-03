@@ -1,6 +1,5 @@
 extends MarginContainer
 
-
 onready var fuel_label: Label = $VBoxContainer/Fuel/Val
 onready var gem_label: Label = $VBoxContainer/Gem/Val
 onready var depth_label: Label = $VBoxContainer/Depth/Val
@@ -19,4 +18,4 @@ func _on_Player_gem_changed(gem: int):
 
 
 func _on_Player_depth_changed(depth: int):
-	depth_label.text = str((depth + 1) * 10) + " feet"
+	depth_label.text = str(depth * 10) + " feet"

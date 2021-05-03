@@ -4,6 +4,7 @@ export var dmg := 10
 onready var timer: Timer = $Timer
 var body
 
+
 func _on_Area2D_body_entered(body):
 	self.body = body
 	body.damage(dmg)
