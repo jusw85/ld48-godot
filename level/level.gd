@@ -350,10 +350,11 @@ onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 
 func _spawn_rockbreak(p_grid_pos: Vector2, num: int) -> void:
 	# TODO: fix this shit
-	if $"../Player".xp_level == 2:
-		$"../Player/Camera2D".shake(0.05, 25.0, 5.0)
-	elif $"../Player".xp_level == 3:
-		$"../Player/Camera2D".shake(0.1, 25.0, 10.0)
+#	if $"../Player".xp_level == 2:
+#		$"../Player/Camera2D".shake(0.05, 25.0, 5.0)
+#	elif $"../Player".xp_level == 3:
+#		$"../Player/Camera2D".shake(0.1, 25.0, 10.0)
+
 	var rb = RockBreak.instance()
 	tilemap.add_child(rb)
 	rb.position = tilemap.map_to_world(p_grid_pos)

@@ -10,10 +10,18 @@ onready var gui = $GUICanvas/GUI
 
 
 func _ready():
+	Globals.reset()
+	Globals.camera = $Camera2D
 	gui.update_fuel(player.fuel)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if Globals.is_dead and event.is_action_pressed("restart"):
+		get_tree().reload_current_scene()
+
+
 func _on_Player_player_died():
+	Globals.is_dead = true
 	if not Globals.is_hell:
 		gui_canvas.add_child(End.instance())
 	else:

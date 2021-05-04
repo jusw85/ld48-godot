@@ -29,8 +29,6 @@ export var punch_strength := [1, 2, 3, 4]
 var gem := 0 setget gem_set
 var depth := -1
 var xp_level := 0
-var cam_left_x: float
-var cam_right_x: float
 var to_del_downpunch: Vector2
 
 onready var fuel := start_fuel setget fuel_set
@@ -40,14 +38,13 @@ onready var player_frames = [
 	preload("res://player/player2.tres"),
 	preload("res://player/player3.tres")
 ]
-onready var map = $"../Level"
+onready var map = $"../Map"
 onready var directional_input: NC.DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: AnimatedSprite = $AnimatedSprite
 onready var mask: Sprite = $Mask
-onready var camera: Camera2D = $Camera2D
 onready var punch_sfx: AudioStreamPlayer = $PunchSfx
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 onready var invuln_timer: Timer = $InvulnTimer
@@ -55,36 +52,10 @@ onready var flash_tween: Tween = $FlashTween
 
 
 func _ready() -> void:
-#	move this shit to global camera?
-	cam_left_x = map.bounds_min.x
-	cam_right_x = map.bounds_max.x + 64
-	camera.limit_left = cam_left_x
-	camera.limit_right = cam_right_x
 
 	sprite.playing = true
 	_enter_idle()
 	state = State.IDLE
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if state == State.DEAD:
-		if event.is_action_pressed("restart"):
-			get_tree().reload_current_scene()
-		else:
-			return
-
-
-func _process(_delta) -> void:
-	if position.x < cam_left_x + 64:
-		camera.limit_left = position.x - 64
-	else:
-		camera.limit_left = cam_left_x
-
-	if position.x > cam_right_x - 64:
-		camera.limit_right = position.x + 64
-	else:
-		camera.limit_right = cam_right_x
-
 
 #class FrameInfo:
 #	var dir: Vector2
@@ -396,6 +367,9 @@ func _on_AnimatedSprite_animation_finished():
 	var is_grounded = ground_cast.is_colliding()
 	var grid_pos = map.get_grid_pos(global_position)
 
+#	1 frame tilemap off for is_grounded
+#	https://github.com/godotengine/godot/issues/48397
+
 	# check transitions
 	if not is_grounded:
 		_enter_falling()
@@ -475,7 +449,6 @@ func fuel_set(val: int) -> void:
 	emit_signal("fuel_changed", fuel)
 
 
-
 func do_hell():
 	Globals.is_hell = true
 	emit_signal("depth_changed", 666)
@@ -487,5 +460,5 @@ func do_hell():
 	mask_tween.start()
 
 	var camera_tween = $CameraTween
-	camera_tween.interpolate_property(camera, "offset:y", null, -144.0, 0.15)
+	camera_tween.interpolate_property(Globals.camera, "offset:y", null, -144.0, 0.15)
 	camera_tween.start()

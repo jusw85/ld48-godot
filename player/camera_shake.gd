@@ -1,5 +1,6 @@
 extends Camera2D
 
+
 var _duration = 0.0
 var _period_in_ms = 0.0
 var _amplitude = 0.0
