@@ -3,7 +3,8 @@ extends KinematicBody2D
 
 # 	TODO: check store velocity between frames, increasing gravity
 # player: state machine
-# fix depth
+# possible: remove references to ..* i.e. map, so scene can standalone
+# fix depth calculation
 # reorder tilemap ids
 # positional audio for punch
 # tighten controls
@@ -143,7 +144,7 @@ func _process_idle():
 	elif r_cast.is_colliding() and dir.x > 0:
 		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -152,7 +153,7 @@ func _process_idle():
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -225,7 +226,7 @@ func _process_falling():
 	elif r_cast.is_colliding() and dir.x > 0:
 		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -234,7 +235,7 @@ func _process_falling():
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -297,7 +298,7 @@ func _process_walking():
 	elif r_cast.is_colliding() and dir.x > 0:
 		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -306,7 +307,7 @@ func _process_walking():
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -360,7 +361,7 @@ func _on_AnimatedSprite_animation_finished():
 		return
 
 	if state == State.PUNCH_D:
-		map.break_rock(to_del_downpunch, punch_strength[xp_level])
+		map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
 
 	ground_cast.force_raycast_update()
 	var dir = directional_input.get_input_direction()
@@ -384,7 +385,7 @@ func _on_AnimatedSprite_animation_finished():
 	elif r_cast.is_colliding() and dir.x > 0:
 		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()
@@ -393,7 +394,7 @@ func _on_AnimatedSprite_animation_finished():
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
 		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level])
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
 			_enter_punch_r()

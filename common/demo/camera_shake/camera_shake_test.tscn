@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://common/camera_shake.gd" type="Script" id=1]
+[ext_resource path="res://common/demo/camera_shake/camera_shake_test.gd" type="Script" id=2]
+[ext_resource path="res://common/quit_on_action.gd" type="Script" id=4]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="Quit" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+
+[node name="Shake" type="Node" parent="Camera2D"]
+script = ExtResource( 1 )

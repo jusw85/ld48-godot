@@ -291,14 +291,14 @@ func is_rock(p_grid_pos: Vector2) -> bool:
 
 # use objects for rocks?
 # object destroyer above player
-func break_rock(p_grid_pos: Vector2, p_dmg: int):
+func break_rock(p_grid_pos: Vector2, p_dmg: int, p_level: int):
 	assert(is_rock(p_grid_pos))
 	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
 	var rock_id := int(autotile_id.x)
 	var new_rock_id = rock_id - p_dmg
 	for i in [1, 3, 5, 7]:
 		if i in range(new_rock_id + 1, rock_id + 1):
-			_spawn_rockbreak(p_grid_pos, i)
+			_spawn_rockbreak(p_grid_pos, i, p_level)
 
 	if new_rock_id < 1:
 		crumble_sfx.play()
@@ -348,12 +348,12 @@ const RockBreak := preload("res://level/rock_anim.tscn")
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 
 
-func _spawn_rockbreak(p_grid_pos: Vector2, num: int) -> void:
+func _spawn_rockbreak(p_grid_pos: Vector2, num: int, p_level: int) -> void:
 	# TODO: fix this shit
-#	if $"../Player".xp_level == 2:
-#		$"../Player/Camera2D".shake(0.05, 25.0, 5.0)
-#	elif $"../Player".xp_level == 3:
-#		$"../Player/Camera2D".shake(0.1, 25.0, 10.0)
+	if p_level == 2:
+		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
+	elif p_level == 3:
+		Globals.camera.get_node("Shake").shake(0.10, 100.0, 8.0)
 
 	var rb = RockBreak.instance()
 	tilemap.add_child(rb)
