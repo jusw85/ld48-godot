@@ -6,6 +6,7 @@
 // https://bisqwit.iki.fi/story/howto/dither/jy/
 // https://github.com/allen-garvey/dithermark/
 shader_type canvas_item;
+render_mode unshaded;
 
 const mat4 m = mat4(
 	vec4(1, 9, 3, 11) / 17.0,

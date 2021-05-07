@@ -1,6 +1,5 @@
 extends KinematicBody2D
 
-
 # 	TODO: check store velocity between frames, increasing gravity
 # player: state machine
 # possible: remove references to ..* i.e. map, so scene can standalone
@@ -9,6 +8,7 @@ extends KinematicBody2D
 # positional audio for punch
 # tighten controls
 # collectible AOE fly to player
+# reduce spike aoe
 # dust effect on drop
 # lerp global camera
 # texture (cross) hatch shader
@@ -17,7 +17,7 @@ signal fuel_changed(fuel)
 signal gem_changed(gem)
 signal depth_changed(depth)
 signal level_changed(level)
-signal player_died()
+signal player_died
 
 enum State { IDLE, PUNCH_R, PUNCH_D, DEAD, WALKING, FALLING }
 var state = State.IDLE
@@ -50,14 +50,14 @@ onready var mask: Sprite = $Mask
 onready var punch_sfx: AudioStreamPlayer = $PunchSfx
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 onready var invuln_timer: Timer = $InvulnTimer
-onready var flash_tween: Tween = $FlashTween
+onready var sprite_flasher = $AnimatedSprite/SpriteFlasher
 
 
 func _ready() -> void:
-
 	sprite.playing = true
 	_enter_idle()
 	state = State.IDLE
+
 
 #class FrameInfo:
 #	var dir: Vector2
@@ -178,19 +178,24 @@ func _enter_punch_r():
 	sprite.animation = "punchright"
 	sprite.frame = 0
 
+
 func _process_punch_r():
 	assert(sprite.animation == "punchright")
+
 
 func _enter_punch_d():
 	sprite.animation = "punchdown"
 	sprite.frame = 0
 
+
 func _process_punch_d():
 	assert(sprite.animation == "punchdown")
+
 
 func _enter_falling():
 	sprite.animation = "idle"
 	sprite.frame = 0
+
 
 func _process_falling():
 	var dir = directional_input.get_input_direction()
@@ -258,9 +263,11 @@ func _process_falling():
 		_enter_idle()
 		state = State.IDLE
 
+
 func _enter_walking():
 	sprite.animation = "walking"
 	sprite.frame = 0
+
 
 func _process_walking():
 #	var frame_info = _get_frame_info()
@@ -327,9 +334,11 @@ func _process_walking():
 		_enter_idle()
 		state = State.IDLE
 
+
 func _enter_dead():
 	sprite.animation = "idle"
 	sprite.frame = 0
+
 
 func _process_dead():
 	var grid_pos = map.get_grid_pos(global_position)
@@ -424,17 +433,7 @@ func damage(dmg: int):
 	if invuln_timer.time_left <= 0:
 		self.fuel -= dmg
 		invuln_timer.start()
-		while invuln_timer.time_left > 0:
-			flash_tween.interpolate_property(
-				sprite.material, "shader_param/flash_amount", 0.0, 1.0, 0.25
-			)
-			flash_tween.start()
-			yield(flash_tween, "tween_all_completed")
-			flash_tween.interpolate_property(
-				sprite.material, "shader_param/flash_amount", 1.0, 0.0, 0.25
-			)
-			flash_tween.start()
-			yield(flash_tween, "tween_all_completed")
+		sprite_flasher.flash(0.25)
 
 
 func gem_set(val: int) -> void:
@@ -464,3 +463,7 @@ func do_hell():
 	var camera_tween = $CameraTween
 	camera_tween.interpolate_property(Globals.camera, "offset:y", null, -144.0, 0.15)
 	camera_tween.start()
+
+
+func _on_InvulnTimer_timeout():
+	sprite_flasher.stop()

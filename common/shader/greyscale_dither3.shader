@@ -6,6 +6,7 @@
 // https://bisqwit.iki.fi/story/howto/dither/jy/
 // https://github.com/allen-garvey/dithermark/
 shader_type canvas_item;
+render_mode unshaded;
 // r = 1 / cbrt(num_colours) = 1 / cbrt(2)
 uniform float r: hint_range(0, 1) = 0.79370052598;
 uniform float threshold: hint_range(0, 1) = 0.5;
@@ -16,6 +17,15 @@ const mat4 m = mat4(
 	(vec4(3, 11, 1, 9) / 15.0) - 0.5,
 	(vec4(15, 7, 13, 5) / 15.0) - 0.5
 );
+
+// https://github.com/allen-garvey/dithermark/blob/e6711ee5c4a44413139261c29f947071bbe0fa1e/js_src/shared/bayer-matrix.js
+// hatch right
+//const mat4 m = mat4(
+//	(vec4(15, 7.5, 0, 7.5) / 15.0) - 0.5,
+//	(vec4(7.5, 0, 7.5, 15) / 15.0) - 0.5,
+//	(vec4(0, 7.5, 15, 7.5) / 15.0) - 0.5,
+//	(vec4(7.5, 15, 7.5, 0) / 15.0) - 0.5
+//);
 
 // https://github.com/godotengine/godot-proposals/issues/2175
 float idx_mat4_2d(int y, int x) {

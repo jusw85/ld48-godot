@@ -1,6 +1,5 @@
 extends Camera2D
 
-
 var cam_left_x: float
 var cam_right_x: float
 

@@ -1,7 +1,6 @@
 # warning-ignore-all:return_value_discarded
 extends Node2D
 
-
 const End := preload("res://gui/end.tscn")
 const End2 := preload("res://gui/end2.tscn")
 

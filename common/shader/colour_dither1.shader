@@ -6,6 +6,7 @@
 // https://bisqwit.iki.fi/story/howto/dither/jy/
 // https://github.com/allen-garvey/dithermark/
 shader_type canvas_item;
+render_mode unshaded;
 // r = 1 / cbrt(num_colours)
 uniform float r: hint_range(0, 1) = 0.69336127435;
 

@@ -36,7 +36,7 @@ var hell_rect
 # fuel, gem, empty, spike, trap1, trap2, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71],
+	[0.09, 0.02, 0.20, 0.40, 0.00, 0.00, 0.71],
 	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
 	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
 	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
@@ -115,7 +115,6 @@ func _calculate_map_bounds():
 			bounds_max.y = int(pos.y)
 	bounds_min = tilemap.to_global(tilemap.map_to_world(bounds_min))
 	bounds_max = tilemap.to_global(tilemap.map_to_world(bounds_max))
-
 
 
 # 6 down view range
@@ -305,13 +304,7 @@ func break_rock(p_grid_pos: Vector2, p_dmg: int, p_level: int):
 		tilemap.set_cellv(p_grid_pos, -1)
 	else:
 		tilemap.set_cell(
-			p_grid_pos.x,
-			p_grid_pos.y,
-			4,
-			false,
-			false,
-			false,
-			Vector2(new_rock_id, 0)
+			p_grid_pos.x, p_grid_pos.y, 4, false, false, false, Vector2(new_rock_id, 0)
 		)
 	tilemap.update_dirty_quadrants()
 
@@ -341,7 +334,6 @@ func break_rock(p_grid_pos: Vector2, p_dmg: int, p_level: int):
 #			)
 #		return true
 #	return false
-
 
 const RockBreak := preload("res://level/rock_anim.tscn")
 # TODO: positional crumble audio

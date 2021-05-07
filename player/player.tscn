@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://common/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
@@ -7,7 +7,8 @@
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
 [ext_resource path="res://level/crumble.wav" type="AudioStream" id=6]
 [ext_resource path="res://player/mask/mask.png" type="Texture" id=7]
-[ext_resource path="res://player/flasher.shader" type="Shader" id=9]
+[ext_resource path="res://player/sprite_flasher.gd" type="Script" id=8]
+[ext_resource path="res://common/shader/sprite_flash.shader" type="Shader" id=9]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 14, 29 )
@@ -61,6 +62,11 @@ material = SubResource( 3 )
 frames = ExtResource( 3 )
 animation = "idle"
 
+[node name="SpriteFlasher" type="Node" parent="AnimatedSprite"]
+script = ExtResource( 8 )
+
+[node name="FlashTween" type="Tween" parent="AnimatedSprite/SpriteFlasher"]
+
 [node name="PunchSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 5 )
 bus = "Sfx"
@@ -73,8 +79,6 @@ bus = "Sfx"
 wait_time = 2.0
 one_shot = true
 
-[node name="FlashTween" type="Tween" parent="."]
-
 [node name="MaskTween" type="Tween" parent="."]
 
 [node name="CameraTween" type="Tween" parent="."]
@@ -85,3 +89,4 @@ modulate = Color( 0.952941, 0.2, 0.0784314, 0.270588 )
 texture = ExtResource( 7 )
 
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
+[connection signal="timeout" from="InvulnTimer" to="." method="_on_InvulnTimer_timeout"]

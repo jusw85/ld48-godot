@@ -2,7 +2,6 @@
 # http://jonny.morrill.me/blog/view/14
 extends Node
 
-
 export var camera2d_path := @".."
 
 var _duration = 0.0
@@ -17,6 +16,7 @@ onready var _camera2d: Camera2D = get_node(camera2d_path)
 
 #var noise
 #var noise_y = 0
+
 
 func _ready():
 #	randomize()
@@ -37,10 +37,7 @@ func _process(delta):
 		_next_shake_timer -= _shake_delay
 
 		var intensity = _amplitude * (_timer / _duration)
-		var new_target = intensity * Vector2(
-			rand_range(-1.0, 1.0),
-			rand_range(-1.0, 1.0)
-		)
+		var new_target = intensity * Vector2(rand_range(-1.0, 1.0), rand_range(-1.0, 1.0))
 #		noise_y += 8
 #		var new_target = intensity * Vector2(
 #			noise.get_noise_2d(noise.seed, noise_y),
