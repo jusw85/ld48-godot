@@ -11,6 +11,7 @@ extends KinematicBody2D
 # collectible AOE fly to player
 # dust effect on drop
 # lerp global camera
+# texture (cross) hatch shader
 
 signal fuel_changed(fuel)
 signal gem_changed(gem)

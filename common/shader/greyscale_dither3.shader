@@ -4,25 +4,20 @@
 // https://en.wikipedia.org/wiki/Ordered_dithering
 // https://github.com/SixLabors/ImageSharp/blob/master/src/ImageSharp/Processing/Processors/Dithering/DHALF.TXT
 // https://bisqwit.iki.fi/story/howto/dither/jy/
+// https://github.com/allen-garvey/dithermark/
 shader_type canvas_item;
-uniform float r = 0.5;
-
-//const mat4 m = mat4(
-//	vec4(1, 9, 3, 11) / 17.0,
-//	vec4(13, 5, 15, 7) / 17.0,
-//	vec4(4, 12, 2, 10) / 17.0,
-//	vec4(16, 8, 14, 6) / 17.0
-//);
+// r = 1 / cbrt(num_colours) = 1 / cbrt(2)
+uniform float r: hint_range(0, 1) = 0.79370052598;
+uniform float threshold: hint_range(0, 1) = 0.5;
 
 const mat4 m = mat4(
-	(vec4(1, 9, 3, 11) / 16.0) - 0.5,
-	(vec4(13, 5, 15, 7) / 16.0) - 0.5,
-	(vec4(4, 12, 2, 10) / 16.0) - 0.5,
-	(vec4(16, 8, 14, 6) / 16.0) - 0.5
+	(vec4(0, 8, 2, 10) / 15.0) - 0.5,
+	(vec4(12, 4, 14, 6) / 15.0) - 0.5,
+	(vec4(3, 11, 1, 9) / 15.0) - 0.5,
+	(vec4(15, 7, 13, 5) / 15.0) - 0.5
 );
 
 // https://github.com/godotengine/godot-proposals/issues/2175
-//float idx_mat4_2d(mat4 m, int y, int x) {
 float idx_mat4_2d(int y, int x) {
 	vec4 v;
 	if (y == 0) {
@@ -47,16 +42,15 @@ float idx_mat4_2d(int y, int x) {
 	return val;
 }
 
-//void fragment() {
-//	vec3 rgb = texture(TEXTURE, UV).rgb;
-//
-//	vec2 xy_offset = mod(FRAGCOORD.xy, vec2(4.0, 4.0));
-//	int x = int(xy_offset.x);
-//	int y = int(xy_offset.y);
-//
-//	float threshold = idx_mat4_2d(y, x);
-//	COLOR.rgb = step(vec3(threshold), rgb);
-////	COLOR = texture(TEXTURE, UV);
+// https://en.wikipedia.org/wiki/HSL_and_HSV#Lightness
+float lightness(vec3 rgb) {
+	float lmax = max(max(rgb.r, rgb.g), rgb.b);
+	float lmin = min(min(rgb.r, rgb.g), rgb.b);
+	return (lmax + lmin) / 2.0;
+}
+
+//float lightness(vec3 rgb) {
+//	return dot(rgb, vec3(0.2989, 0.5870, 0.1140));
 //}
 
 void fragment() {
@@ -65,13 +59,12 @@ void fragment() {
 	vec2 xy_offset = mod(FRAGCOORD.xy, vec2(4.0, 4.0));
 	int x = int(xy_offset.x);
 	int y = int(xy_offset.y);
+	float bayer_val = idx_mat4_2d(y, x);
+	float lightness = lightness(rgb);
 	
-	float threshold = idx_mat4_2d(y, x);
-	rgb += vec3(threshold * r);
-	if (rgb.r < (1.0 / 3.0)) {
+	bool cond = lightness + (r * bayer_val) < threshold;
+	if (cond) {
 		COLOR.rgb = vec3(0.0);
-	} else if (rgb.r < (2.0 / 3.0)) {
-		COLOR.rgb = vec3(0.5);
 	} else {
 		COLOR.rgb = vec3(1.0);
 	}
