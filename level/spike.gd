@@ -1,12 +1,13 @@
 extends Node2D
 
 export var dmg := 10
-onready var timer: Timer = $Timer
 var body
 
+onready var timer: Timer = $Timer
 
-func _on_Area2D_body_entered(body):
-	self.body = body
+
+func _on_Area2D_body_entered(p_body):
+	self.body = p_body
 	body.damage(dmg)
 	timer.start()
 

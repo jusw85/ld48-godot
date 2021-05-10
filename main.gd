@@ -4,6 +4,7 @@ extends Node2D
 const End := preload("res://gui/end.tscn")
 const End2 := preload("res://gui/end2.tscn")
 
+onready var is_dead = false
 onready var player = $Player
 onready var gui_canvas = $GUICanvas
 onready var gui = $GUICanvas/GUI
@@ -16,12 +17,12 @@ func _ready():
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if Globals.is_dead and event.is_action_pressed("restart"):
+	if is_dead and event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
 
 
 func _on_Player_player_died():
-	Globals.is_dead = true
+	is_dead = true
 	if not Globals.is_hell:
 		gui_canvas.add_child(End.instance())
 	else:

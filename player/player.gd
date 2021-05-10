@@ -1,7 +1,7 @@
 extends KinematicBody2D
 
-# 	TODO: check store velocity between frames, increasing gravity
-# player: state machine
+# fsm
+# check store velocity between frames, increasing gravity
 # possible: remove references to ..* i.e. map, so scene can standalone
 # fix depth calculation
 # reorder tilemap ids
@@ -12,6 +12,8 @@ extends KinematicBody2D
 # dust effect on drop
 # lerp global camera
 # texture (cross) hatch shader
+# HUD bars
+# HUD depth slider?
 
 signal fuel_changed(fuel)
 signal gem_changed(gem)
@@ -19,8 +21,7 @@ signal depth_changed(depth)
 signal level_changed(level)
 signal player_died
 
-enum State { IDLE, PUNCH_R, PUNCH_D, DEAD, WALKING, FALLING }
-var state = State.IDLE
+enum State { IDLE, PUNCH_R, PUNCH_D, FALLING, WALKING, DEAD }
 
 export var walk_speed := 600.0
 export var gravity := 500.0
@@ -32,31 +33,32 @@ var gem := 0 setget gem_set
 var depth := -1
 var xp_level := 0
 var to_del_downpunch: Vector2
+var _fsm: NC.StateMachine
 
 onready var fuel := start_fuel setget fuel_set
 onready var player_frames = [
-	preload("res://player/player0.tres"),
-	preload("res://player/player1.tres"),
-	preload("res://player/player2.tres"),
-	preload("res://player/player3.tres")
+	preload("res://player/person1_ss.png"),
+	preload("res://player/person2_ss.png"),
+	preload("res://player/person3_ss.png"),
+	preload("res://player/person4_ss.png"),
 ]
 onready var map = $"../Map"
 onready var directional_input: NC.DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
-onready var sprite: AnimatedSprite = $AnimatedSprite
+onready var sprite: Sprite = $Sprite
+onready var animation_player: AnimationPlayer = $AnimationPlayer
 onready var mask: Sprite = $Mask
 onready var punch_sfx: AudioStreamPlayer = $PunchSfx
 onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 onready var invuln_timer: Timer = $InvulnTimer
-onready var sprite_flasher = $AnimatedSprite/SpriteFlasher
-
+onready var sprite_flasher: NC.SpriteFlasher = $Sprite/SpriteFlasher
 
 func _ready() -> void:
-	sprite.playing = true
-	_enter_idle()
-	state = State.IDLE
+	_fsm = NC.StateMachine.new()
+	_fsm.init_funcs(self, State)
+	_fsm.change_state(State.IDLE)
 
 
 #class FrameInfo:
@@ -84,28 +86,11 @@ func _physics_process(_delta) -> void:
 	# collect input
 	# simulate and update internal variables
 	# transition state
-
-	# preload funcrefs
-
-#	print(State.keys()[state])
-	match state:
-		State.IDLE:
-			_process_idle()
-		State.WALKING:
-			_process_walking()
-		State.DEAD:
-			_process_dead()
-		State.PUNCH_R:
-			_process_punch_r()
-		State.PUNCH_D:
-			_process_punch_d()
-		State.FALLING:
-			_process_falling()
+	_fsm.process_state()
 
 
 func _enter_idle():
-	sprite.animation = "idle"
-	sprite.frame = 0
+	animation_player.play("idle")
 
 
 func _process_idle():
@@ -133,12 +118,10 @@ func _process_idle():
 	_flip_sprite(dir.x)
 	# check transitions
 	if not is_grounded:
-		_enter_falling()
-		state = State.FALLING
+		_fsm.change_state(State.FALLING)
 	# check dead
 	elif fuel <= 0:
-		_enter_dead()
-		state = State.DEAD
+		_fsm.change_state(State.DEAD)
 		emit_signal("player_died")
 
 	# check attack
@@ -148,8 +131,7 @@ func _process_idle():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
@@ -157,44 +139,38 @@ func _process_idle():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif dir.y > 0:
 		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
 		if map.is_rock(check_grid_pos):
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_d()
-			state = State.PUNCH_D
+			_fsm.change_state(State.PUNCH_D)
 			to_del_downpunch = check_grid_pos
 
 	elif dir.x != 0.0:
-		_enter_walking()
-		state = State.WALKING
+		_fsm.change_state(State.WALKING)
 
 
 func _enter_punch_r():
-	sprite.animation = "punchright"
-	sprite.frame = 0
+	animation_player.play("punch_r")
 
 
 func _process_punch_r():
-	assert(sprite.animation == "punchright")
+	assert(animation_player.current_animation == "punch_r")
 
 
 func _enter_punch_d():
-	sprite.animation = "punchdown"
-	sprite.frame = 0
+	animation_player.play("punch_d")
 
 
 func _process_punch_d():
-	assert(sprite.animation == "punchdown")
+	assert(animation_player.current_animation == "punch_d")
 
 
 func _enter_falling():
-	sprite.animation = "idle"
-	sprite.frame = 0
+	animation_player.play("idle")
 
 
 func _process_falling():
@@ -224,8 +200,7 @@ func _process_falling():
 		return
 	# check dead
 	elif fuel <= 0:
-		_enter_dead()
-		state = State.DEAD
+		_fsm.change_state(State.DEAD)
 		emit_signal("player_died")
 
 	# check attack
@@ -235,8 +210,7 @@ func _process_falling():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
@@ -244,29 +218,24 @@ func _process_falling():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif dir.y > 0:
 		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
 		if map.is_rock(check_grid_pos):
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_d()
-			state = State.PUNCH_D
+			_fsm.change_state(State.PUNCH_D)
 			to_del_downpunch = check_grid_pos
 
 	elif dir.x != 0.0:
-		_enter_walking()
-		state = State.WALKING
+		_fsm.change_state(State.WALKING)
 	else:
-		_enter_idle()
-		state = State.IDLE
+		_fsm.change_state(State.IDLE)
 
 
 func _enter_walking():
-	sprite.animation = "walking"
-	sprite.frame = 0
+	animation_player.play("walking")
 
 
 func _process_walking():
@@ -294,12 +263,10 @@ func _process_walking():
 	_flip_sprite(dir.x)
 	# check transitions
 	if not is_grounded:
-		_enter_falling()
-		state = State.FALLING
+		_fsm.change_state(State.FALLING)
 	# check dead
 	elif fuel <= 0:
-		_enter_dead()
-		state = State.DEAD
+		_fsm.change_state(State.DEAD)
 		emit_signal("player_died")
 
 	# check attack
@@ -309,8 +276,7 @@ func _process_walking():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif l_cast.is_colliding() and dir.x < 0:
 		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
@@ -318,26 +284,22 @@ func _process_walking():
 			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
+			_fsm.change_state(State.PUNCH_R)
 
 	elif dir.y > 0:
 		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
 		if map.is_rock(check_grid_pos):
 			self.fuel -= 1
 			punch_sfx.play()
-			_enter_punch_d()
-			state = State.PUNCH_D
+			_fsm.change_state(State.PUNCH_D)
 			to_del_downpunch = check_grid_pos
 
 	elif dir.x == 0.0:
-		_enter_idle()
-		state = State.IDLE
+		_fsm.change_state(State.IDLE)
 
 
 func _enter_dead():
-	sprite.animation = "idle"
-	sprite.frame = 0
+	animation_player.play("idle")
 
 
 func _process_dead():
@@ -366,69 +328,8 @@ func _flip_sprite(x_input: int) -> void:
 		sprite.flip_h = true
 
 
-func _on_AnimatedSprite_animation_finished():
-	if not (state == State.PUNCH_D or state == State.PUNCH_R):
-		return
-
-	if state == State.PUNCH_D:
-		map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
-
-	ground_cast.force_raycast_update()
-	var dir = directional_input.get_input_direction()
-	var is_grounded = ground_cast.is_colliding()
-	var grid_pos = map.get_grid_pos(global_position)
-
-#	1 frame tilemap off for is_grounded
-#	https://github.com/godotengine/godot/issues/48397
-
-	# check transitions
-	if not is_grounded:
-		_enter_falling()
-		state = State.FALLING
-	# check dead
-	elif fuel <= 0:
-		_enter_dead()
-		state = State.DEAD
-		emit_signal("player_died")
-
-	# check attack
-	elif r_cast.is_colliding() and dir.x > 0:
-		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
-
-	elif l_cast.is_colliding() and dir.x < 0:
-		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_enter_punch_r()
-			state = State.PUNCH_R
-
-	elif dir.y > 0:
-		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
-		if map.is_rock(check_grid_pos):
-			self.fuel -= 1
-			punch_sfx.play()
-			_enter_punch_d()
-			state = State.PUNCH_D
-			to_del_downpunch = check_grid_pos
-
-	elif dir.x != 0.0:
-		_enter_walking()
-		state = State.WALKING
-	else:
-		_enter_idle()
-		state = State.IDLE
-
-
 func damage(dmg: int):
-	if state == State.DEAD:
+	if _fsm.state == State.DEAD:
 		return
 	if invuln_timer.time_left <= 0:
 		self.fuel -= dmg
@@ -441,7 +342,7 @@ func gem_set(val: int) -> void:
 	emit_signal("gem_changed", gem)
 	if xp_level < xp_to_level.size() and gem >= xp_to_level[xp_level]:
 		xp_level += 1
-		sprite.frames = player_frames[xp_level]
+		sprite.texture = player_frames[xp_level]
 		emit_signal("level_changed", xp_level)
 
 
@@ -467,3 +368,58 @@ func do_hell():
 
 func _on_InvulnTimer_timeout():
 	sprite_flasher.stop()
+
+
+func _on_AnimationPlayer_animation_finished(_anim_name):
+	if not (_fsm.state == State.PUNCH_D or _fsm.state == State.PUNCH_R):
+		return
+
+	if _fsm.state == State.PUNCH_D:
+		map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
+		ground_cast.force_raycast_update()
+
+	var dir = directional_input.get_input_direction()
+	var is_grounded = ground_cast.is_colliding()
+	var grid_pos = map.get_grid_pos(global_position)
+
+#	1 frame tilemap off for is_grounded
+#	https://github.com/godotengine/godot/issues/48397
+#   becomes falling here for change tile
+
+	# check transitions
+	if not is_grounded:
+		_fsm.change_state(State.FALLING)
+	# check dead
+	elif fuel <= 0:
+		_fsm.change_state(State.DEAD)
+		emit_signal("player_died")
+
+	# check attack
+	elif r_cast.is_colliding() and dir.x > 0:
+		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
+		if map.is_rock(check_grid_pos):
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
+			self.fuel -= 1
+			punch_sfx.play()
+			_fsm.change_state(State.PUNCH_R)
+
+	elif l_cast.is_colliding() and dir.x < 0:
+		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
+		if map.is_rock(check_grid_pos):
+			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
+			self.fuel -= 1
+			punch_sfx.play()
+			_fsm.change_state(State.PUNCH_R)
+
+	elif dir.y > 0:
+		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
+		if map.is_rock(check_grid_pos):
+			self.fuel -= 1
+			punch_sfx.play()
+			_fsm.change_state(State.PUNCH_D)
+			to_del_downpunch = check_grid_pos
+
+	elif dir.x != 0.0:
+		_fsm.change_state(State.WALKING)
+	else:
+		_fsm.change_state(State.IDLE)

@@ -14,7 +14,7 @@ func _ready():
 	limit_right = cam_right_x
 
 
-func _process(delta):
+func _process(_delta):
 	position = player.position
 	if position.x < cam_left_x + 64:
 		limit_left = position.x - 64

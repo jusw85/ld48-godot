@@ -1,14 +1,14 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://common/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
-[ext_resource path="res://player/player0.tres" type="SpriteFrames" id=3]
 [ext_resource path="res://player/mask/mask.shader" type="Shader" id=4]
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
 [ext_resource path="res://level/crumble.wav" type="AudioStream" id=6]
 [ext_resource path="res://player/mask/mask.png" type="Texture" id=7]
-[ext_resource path="res://player/sprite_flasher.gd" type="Script" id=8]
+[ext_resource path="res://common/sprite_flasher.tscn" type="PackedScene" id=8]
 [ext_resource path="res://common/shader/sprite_flash.shader" type="Shader" id=9]
+[ext_resource path="res://player/person1_ss.png" type="Texture" id=10]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 14, 29 )
@@ -17,10 +17,76 @@ extents = Vector2( 14, 29 )
 shader = ExtResource( 4 )
 shader_param/size = 1.0
 
-[sub_resource type="ShaderMaterial" id=3]
+[sub_resource type="ShaderMaterial" id=8]
 shader = ExtResource( 9 )
 shader_param/flash_amount = 0.0
 shader_param/flash_colour = Color( 1, 1, 1, 1 )
+
+[sub_resource type="Animation" id=4]
+resource_name = "idle"
+length = 0.0166667
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 7 ]
+}
+
+[sub_resource type="Animation" id=6]
+resource_name = "punch_d"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 8, 9, 10, 11, 12, 13 ]
+}
+
+[sub_resource type="Animation" id=7]
+resource_name = "punch_r"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 4, 5, 6 ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "walking"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 0, 1, 2, 3 ]
+}
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 4
@@ -57,15 +123,19 @@ enabled = true
 exclude_parent = false
 cast_to = Vector2( -1, 0 )
 
-[node name="AnimatedSprite" type="AnimatedSprite" parent="."]
-material = SubResource( 3 )
-frames = ExtResource( 3 )
-animation = "idle"
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 8 )
+texture = ExtResource( 10 )
+hframes = 14
+frame = 7
 
-[node name="SpriteFlasher" type="Node" parent="AnimatedSprite"]
-script = ExtResource( 8 )
+[node name="SpriteFlasher" parent="Sprite" instance=ExtResource( 8 )]
 
-[node name="FlashTween" type="Tween" parent="AnimatedSprite/SpriteFlasher"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/idle = SubResource( 4 )
+anims/punch_d = SubResource( 6 )
+anims/punch_r = SubResource( 7 )
+anims/walking = SubResource( 5 )
 
 [node name="PunchSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 5 )
@@ -88,5 +158,5 @@ visible = false
 modulate = Color( 0.952941, 0.2, 0.0784314, 0.270588 )
 texture = ExtResource( 7 )
 
-[connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
 [connection signal="timeout" from="InvulnTimer" to="." method="_on_InvulnTimer_timeout"]

@@ -36,7 +36,7 @@ var hell_rect
 # fuel, gem, empty, spike, trap1, trap2, stone(rest)
 # last val is remaining, doesn't need to be correct
 var tile_prob = [
-	[0.09, 0.02, 0.20, 0.40, 0.00, 0.00, 0.71],
+	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71],
 	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
 	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
 	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
