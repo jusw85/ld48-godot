@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/gem2.png-d7b9f315d15c39fa351bc5d30ad7c09f.stex"
+path="res://.import/soil-all.png-4c94331fbe9be45773981894f06474c8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://collectibles/gem2.png"
-dest_files=[ "res://.import/gem2.png-d7b9f315d15c39fa351bc5d30ad7c09f.stex" ]
+source_file="res://level/assets/soil-all.png"
+dest_files=[ "res://.import/soil-all.png-4c94331fbe9be45773981894f06474c8.stex" ]
 
 [params]
 

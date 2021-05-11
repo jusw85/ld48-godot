@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/spike.png-1a5cf9036ca728162b7a43b07fd1d601.stex"
+path="res://.import/mask.png-33ca2f52cf751268828275f06a9c9696.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level/spike.png"
-dest_files=[ "res://.import/spike.png-1a5cf9036ca728162b7a43b07fd1d601.stex" ]
+source_file="res://player/mask.png"
+dest_files=[ "res://.import/mask.png-33ca2f52cf751268828275f06a9c9696.stex" ]
 
 [params]
 

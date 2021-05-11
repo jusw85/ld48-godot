@@ -2,7 +2,7 @@
 
 [ext_resource path="res://collectibles/consume.wav" type="AudioStream" id=1]
 [ext_resource path="res://collectibles/fuel.gd" type="Script" id=2]
-[ext_resource path="res://collectibles/fuel2.png" type="Texture" id=3]
+[ext_resource path="res://collectibles/fuel.png" type="Texture" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 20.0
@@ -42,7 +42,7 @@ fuel_pickup_value = 5
 [node name="Area2D" type="Area2D" parent="."]
 position = Vector2( 32, 32 )
 collision_layer = 2
-collision_mask = 4
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource( 1 )
@@ -50,7 +50,6 @@ shape = SubResource( 1 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Area2D"]
 frames = SubResource( 6 )
 animation = "flash"
-frame = 2
 playing = true
 
 [node name="Sfx" type="AudioStreamPlayer" parent="."]
@@ -61,6 +60,7 @@ bus = "Sfx"
 position = Vector2( 32, 96 )
 rect = Rect2( -25, -10, 50, 20 )
 
+[connection signal="area_entered" from="Area2D" to="." method="_on_Area2D_area_entered"]
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]
 [connection signal="finished" from="Sfx" to="." method="_on_Sfx_finished"]
 [connection signal="screen_exited" from="VisibilityNotifier2D" to="." method="_on_VisibilityNotifier2D_screen_exited"]

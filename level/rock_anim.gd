@@ -4,6 +4,7 @@ onready var sprite: AnimatedSprite = $AnimatedSprite
 
 
 func start(anim: String):
+	sprite.frame = 0
 	sprite.play(anim)
 
 

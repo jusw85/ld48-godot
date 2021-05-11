@@ -15,6 +15,7 @@ var gen_range := 10
 const Fuel := preload("res://collectibles/fuel.tscn")
 const Gem := preload("res://collectibles/gem.tscn")
 const Spike := preload("res://level/spike.tscn")
+const Rock := preload("res://level/rock.tscn")
 
 const Spike1 := preload("res://level/premade/spike1.tscn")
 var spike1_tilemap
@@ -103,7 +104,8 @@ func _ready():
 
 
 func _calculate_map_bounds():
-	var used_cells = tilemap.get_used_cells()
+	var used_cells = border.get_used_cells()
+#	var used_cells = tilemap.get_used_cells()
 	for pos in used_cells:
 		if pos.x < bounds_min.x:
 			bounds_min.x = int(pos.x)
@@ -113,8 +115,10 @@ func _calculate_map_bounds():
 			bounds_min.y = int(pos.y)
 		elif pos.y > bounds_max.y:
 			bounds_max.y = int(pos.y)
-	bounds_min = tilemap.to_global(tilemap.map_to_world(bounds_min))
-	bounds_max = tilemap.to_global(tilemap.map_to_world(bounds_max))
+	bounds_min = border.to_global(border.map_to_world(bounds_min))
+	bounds_max = border.to_global(border.map_to_world(bounds_max))
+	bounds_min.x += 64
+	bounds_max.x -= 64
 
 
 # 6 down view range
@@ -177,6 +181,14 @@ func _create_map():
 			elif tile_id == 1:
 				tilemap.set_cell(x, y, -1)
 				_create_instance(Gem.instance(), x, y)
+			elif tile_id == 4:
+				var auto = tilemap.get_cell_autotile_coord(x, y)
+				tilemap.set_cell(x, y, -1)
+				var inst = Rock.instance()
+				_create_instance(inst, x, y) # rename to add_isntance_to_map
+				inst.start(int(auto.x))
+#				pass
+
 			elif tile_id == 6:
 				tilemap.set_cell(x, y, -1)
 				_create_instance(Spike.instance(), x, y)
@@ -283,6 +295,7 @@ func get_grid_pos(p_global_pos: Vector2) -> Vector2:
 
 
 func is_rock(p_grid_pos: Vector2) -> bool:
+#	return true
 	var tile_id := tilemap.get_cellv(p_grid_pos)
 	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
 	return tile_id == 4 and autotile_id.x <= 7 and autotile_id.x >= 1
@@ -341,7 +354,6 @@ onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
 
 
 func _spawn_rockbreak(p_grid_pos: Vector2, num: int, p_level: int) -> void:
-	# TODO: fix this shit
 	if p_level == 2:
 		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
 	elif p_level == 3:

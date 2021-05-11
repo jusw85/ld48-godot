@@ -75,7 +75,8 @@ restart={
 
 2d_physics/layer_1="solid"
 2d_physics/layer_2="collectibles"
-2d_physics/layer_3="player"
+2d_physics/layer_3="breakable"
+2d_physics/layer_4="damager"
 
 [rendering]
 

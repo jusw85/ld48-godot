@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/cave2.png-00566cd4e6209a468b00372e34d24ecf.stex"
+path="res://.import/gem1.png-08f16149b2b47ed1765fe01abffd4498.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level/premade/cave2.png"
-dest_files=[ "res://.import/cave2.png-00566cd4e6209a468b00372e34d24ecf.stex" ]
+source_file="res://level/assets/gem1.png"
+dest_files=[ "res://.import/gem1.png-08f16149b2b47ed1765fe01abffd4498.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=true
+flags/filter=false
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2
@@ -30,5 +30,5 @@ process/HDR_as_SRGB=false
 process/invert_color=false
 stream=false
 size_limit=0
-detect_3d=true
+detect_3d=false
 svg/scale=1.0

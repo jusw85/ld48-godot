@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/soil-all.png-b464bd75fb80707f0323e8c6272c0326.stex"
+path="res://.import/spike1.png-907525796b67960fa399ab36e423314b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level/soil-all.png"
-dest_files=[ "res://.import/soil-all.png-b464bd75fb80707f0323e8c6272c0326.stex" ]
+source_file="res://level/assets/spike1.png"
+dest_files=[ "res://.import/spike1.png-907525796b67960fa399ab36e423314b.stex" ]
 
 [params]
 

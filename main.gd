@@ -16,6 +16,10 @@ func _ready():
 	gui.update_fuel(player.fuel)
 
 
+func _zz() -> void:
+	print("BROKEN!")
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if is_dead and event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()

@@ -24,4 +24,12 @@ func _on_Sfx_finished():
 
 
 func _on_VisibilityNotifier2D_screen_exited():
+#	print("!")
 	queue_free()
+
+
+func _on_Area2D_area_entered(area):
+	area.get_parent().fuel += fuel_pickup_value
+	sprite.visible = false
+	collider.set_deferred("disabled", true)
+	sfx.play()

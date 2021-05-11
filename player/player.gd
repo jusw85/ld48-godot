@@ -1,5 +1,8 @@
+# warning-ignore-all:return_value_discarded
 extends KinematicBody2D
 
+# BUG: check collectibles being destroyed on creation below due to visibility notifier?
+# visibility notifier for spikes
 # fsm
 # check store velocity between frames, increasing gravity
 # possible: remove references to ..* i.e. map, so scene can standalone
@@ -7,7 +10,7 @@ extends KinematicBody2D
 # reorder tilemap ids
 # positional audio for punch
 # tighten controls
-# collectible AOE fly to player
+# collectible AOE, --> (fly to player)
 # reduce spike aoe
 # dust effect on drop
 # lerp global camera
@@ -32,7 +35,7 @@ export var punch_strength := [1, 2, 3, 4]
 var gem := 0 setget gem_set
 var depth := -1
 var xp_level := 0
-var to_del_downpunch: Vector2
+var to_del_downpunch
 var _fsm: NC.StateMachine
 
 onready var fuel := start_fuel setget fuel_set
@@ -45,6 +48,7 @@ onready var player_frames = [
 onready var map = $"../Map"
 onready var directional_input: NC.DirectionalInput = $DirectionalInput
 onready var ground_cast: RayCast2D = $GroundCast
+onready var d_cast: RayCast2D = $DownCast
 onready var r_cast: RayCast2D = $RightCast
 onready var l_cast: RayCast2D = $LeftCast
 onready var sprite: Sprite = $Sprite
@@ -83,6 +87,8 @@ func _ready() -> void:
 
 
 func _physics_process(_delta) -> void:
+#	print(OS.get_ticks_msec())
+
 	# collect input
 	# simulate and update internal variables
 	# transition state
@@ -126,28 +132,20 @@ func _process_idle():
 
 	# check attack
 	elif r_cast.is_colliding() and dir.x > 0:
-		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
+		r_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
 	elif l_cast.is_colliding() and dir.x < 0:
-		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
-	elif dir.y > 0:
-		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
-		if map.is_rock(check_grid_pos):
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_D)
-			to_del_downpunch = check_grid_pos
+		l_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
+	elif d_cast.is_colliding() and dir.y > 0:
+		to_del_downpunch = d_cast.get_collider().get_parent()
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_D)
 
 	elif dir.x != 0.0:
 		_fsm.change_state(State.WALKING)
@@ -158,7 +156,8 @@ func _enter_punch_r():
 
 
 func _process_punch_r():
-	assert(animation_player.current_animation == "punch_r")
+	pass
+#	assert(animation_player.current_animation == "punch_r")
 
 
 func _enter_punch_d():
@@ -166,7 +165,9 @@ func _enter_punch_d():
 
 
 func _process_punch_d():
-	assert(animation_player.current_animation == "punch_d")
+#	print("_process_punch_d")
+	pass
+#	assert(animation_player.current_animation == "punch_d")
 
 
 func _enter_falling():
@@ -205,28 +206,20 @@ func _process_falling():
 
 	# check attack
 	elif r_cast.is_colliding() and dir.x > 0:
-		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
+		r_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
 	elif l_cast.is_colliding() and dir.x < 0:
-		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
-	elif dir.y > 0:
-		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
-		if map.is_rock(check_grid_pos):
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_D)
-			to_del_downpunch = check_grid_pos
+		l_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
+	elif d_cast.is_colliding() and dir.y > 0:
+		to_del_downpunch = d_cast.get_collider().get_parent()
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_D)
 
 	elif dir.x != 0.0:
 		_fsm.change_state(State.WALKING)
@@ -271,28 +264,20 @@ func _process_walking():
 
 	# check attack
 	elif r_cast.is_colliding() and dir.x > 0:
-		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
+		r_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
 	elif l_cast.is_colliding() and dir.x < 0:
-		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
-	elif dir.y > 0:
-		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
-		if map.is_rock(check_grid_pos):
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_D)
-			to_del_downpunch = check_grid_pos
+		l_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
+	elif d_cast.is_colliding() and dir.y > 0:
+		to_del_downpunch = d_cast.get_collider().get_parent()
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_D)
 
 	elif dir.x == 0.0:
 		_fsm.change_state(State.IDLE)
@@ -370,17 +355,31 @@ func _on_InvulnTimer_timeout():
 	sprite_flasher.stop()
 
 
+func _before_punch_d_finish():
+#	print("_before_punch_d_finish()")
+#	print(OS.get_ticks_msec())
+
+#	map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
+	pass
+
+
 func _on_AnimationPlayer_animation_finished(_anim_name):
 	if not (_fsm.state == State.PUNCH_D or _fsm.state == State.PUNCH_R):
 		return
+#	print("_on_AnimationPlayer_animation_finished()")
+#	print(OS.get_ticks_msec())
 
 	if _fsm.state == State.PUNCH_D:
-		map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
+		to_del_downpunch.break_rock(punch_strength[xp_level], xp_level)
 		ground_cast.force_raycast_update()
+		d_cast.force_raycast_update()
+#		map.break_rock(to_del_downpunch, punch_strength[xp_level], xp_level)
+#		ground_cast.force_raycast_update()
+
+#   move this to process? for simulation
 
 	var dir = directional_input.get_input_direction()
 	var is_grounded = ground_cast.is_colliding()
-	var grid_pos = map.get_grid_pos(global_position)
 
 #	1 frame tilemap off for is_grounded
 #	https://github.com/godotengine/godot/issues/48397
@@ -396,28 +395,20 @@ func _on_AnimationPlayer_animation_finished(_anim_name):
 
 	# check attack
 	elif r_cast.is_colliding() and dir.x > 0:
-		var check_grid_pos = Vector2(grid_pos.x + 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
+		r_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
 	elif l_cast.is_colliding() and dir.x < 0:
-		var check_grid_pos = Vector2(grid_pos.x - 1, grid_pos.y)
-		if map.is_rock(check_grid_pos):
-			map.break_rock(check_grid_pos, punch_strength[xp_level], xp_level)
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_R)
-
-	elif dir.y > 0:
-		var check_grid_pos = Vector2(grid_pos.x, grid_pos.y + 1)
-		if map.is_rock(check_grid_pos):
-			self.fuel -= 1
-			punch_sfx.play()
-			_fsm.change_state(State.PUNCH_D)
-			to_del_downpunch = check_grid_pos
+		l_cast.get_collider().get_parent().break_rock(punch_strength[xp_level], xp_level)
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_R)
+	elif d_cast.is_colliding() and dir.y > 0:
+		to_del_downpunch = d_cast.get_collider().get_parent()
+		self.fuel -= 1
+		punch_sfx.play()
+		_fsm.change_state(State.PUNCH_D)
 
 	elif dir.x != 0.0:
 		_fsm.change_state(State.WALKING)
