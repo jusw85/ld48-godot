@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://level/soil_tilemap.tres" type="TileSet" id=1]
-[ext_resource path="res://level/premade/test.gd" type="Script" id=2]
+[ext_resource path="res://level/premade/hell.gd" type="Script" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 470.261, 7.11621 )
@@ -16,6 +16,7 @@ tile_data = PoolIntArray( 0, 4, 1, 1, 4, 1, 2, 4, 7, 5, 4, 1, 7, 4, 5, 9, 4, 1, 
 
 [node name="Area2D" type="Area2D" parent="."]
 position = Vector2( 479.662, 5628.21 )
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource( 1 )

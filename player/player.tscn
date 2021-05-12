@@ -1,10 +1,9 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://common/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
 [ext_resource path="res://common/shader/mask.shader" type="Shader" id=4]
 [ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
-[ext_resource path="res://level/assets/crumble.wav" type="AudioStream" id=6]
 [ext_resource path="res://player/mask.png" type="Texture" id=7]
 [ext_resource path="res://common/sprite_flasher.tscn" type="PackedScene" id=8]
 [ext_resource path="res://common/shader/sprite_flash.shader" type="Shader" id=9]
@@ -42,7 +41,6 @@ tracks/0/keys = {
 [sub_resource type="Animation" id=5]
 resource_name = "punch_d"
 length = 0.6
-step = 0.0166667
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
 tracks/0/interp = 1
@@ -54,20 +52,6 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 1,
 "values": [ 8, 9, 10, 11, 12, 13 ]
-}
-tracks/1/type = "method"
-tracks/1/path = NodePath(".")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/keys = {
-"times": PoolRealArray( 0.583335 ),
-"transitions": PoolRealArray( 1 ),
-"values": [ {
-"args": [  ],
-"method": "_before_punch_d_finish"
-} ]
 }
 
 [sub_resource type="Animation" id=6]
@@ -109,6 +93,9 @@ radius = 48.0
 collision_layer = 0
 collision_mask = 9
 script = ExtResource( 2 )
+__meta__ = {
+"_edit_group_": true
+}
 xp_to_level = [ 7, 15, 25 ]
 
 [node name="DirectionalInput" type="Node" parent="."]
@@ -123,9 +110,13 @@ material = SubResource( 2 )
 position = Vector2( -0.176765, 0 )
 texture = ExtResource( 7 )
 
-[node name="GroundCast" type="RayCast2D" parent="."]
-position = Vector2( 0, 32 )
-enabled = true
+[node name="GroundCast1" type="RayCast2D" parent="."]
+position = Vector2( -14, 32 )
+exclude_parent = false
+cast_to = Vector2( 0, 1 )
+
+[node name="GroundCast2" type="RayCast2D" parent="."]
+position = Vector2( 14, 32 )
 exclude_parent = false
 cast_to = Vector2( 0, 1 )
 
@@ -154,7 +145,6 @@ collision_mask = 4
 material = SubResource( 3 )
 texture = ExtResource( 10 )
 hframes = 14
-frame = 8
 
 [node name="SpriteFlasher" parent="Sprite" instance=ExtResource( 8 )]
 
@@ -168,22 +158,9 @@ anims/walking = SubResource( 7 )
 stream = ExtResource( 5 )
 bus = "Sfx"
 
-[node name="CrumbleSfx" type="AudioStreamPlayer" parent="."]
-stream = ExtResource( 6 )
-bus = "Sfx"
-
 [node name="InvulnTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true
-
-[node name="MaskTween" type="Tween" parent="."]
-
-[node name="CameraTween" type="Tween" parent="."]
-
-[node name="Mask2" type="Sprite" parent="."]
-visible = false
-modulate = Color( 0.952941, 0.2, 0.0784314, 0.270588 )
-texture = ExtResource( 7 )
 
 [node name="Collector" type="Area2D" parent="."]
 collision_layer = 0

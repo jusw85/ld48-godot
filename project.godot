@@ -21,12 +21,13 @@ _global_script_class_icons={
 [application]
 
 config/name="ld48-godot"
-run/main_scene="res://main.tscn"
+run/main_scene="res://main/main.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Globals="*res://globals.gd"
+Globals="*res://main/globals.gd"
+Events="*res://main/events.gd"
 
 [display]
 

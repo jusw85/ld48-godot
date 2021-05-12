@@ -8,15 +8,16 @@ onready var sprite: Sprite = $StaticBody2D/Sprite
 # TODO: positional crumble audio
 
 
-
 func start(id: int):
 	sprite.frame = id
 
+
 func _ready():
 #	print(name)
-	pass # Replace with function body.
-#	connect("rock_broken", $"../", "_zz")
+	pass  # Replace with function body.
 
+
+#	connect("rock_broken", $"../", "_zz")
 
 #func _unhandled_input(event):
 #	if event.is_action_pressed("ui_up"):
@@ -26,7 +27,7 @@ func _ready():
 
 func break_block():
 	print("BREAKING!")
-	emit_signal("rock_broken")
+	emit_signal("rock_broken") # camera shake
 
 
 #func is_rock(p_grid_pos: Vector2) -> bool:
@@ -53,7 +54,9 @@ func break_rock(p_dmg: int, p_level: int):
 	else:
 		sprite.frame = new_rock_id
 
+
 func _spawn_rockbreak(num: int, p_level: int) -> void:
+#	emit_signal here
 	if p_level == 2:
 		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
 	elif p_level == 3:
@@ -62,7 +65,7 @@ func _spawn_rockbreak(num: int, p_level: int) -> void:
 	var rb = RockBreak.instance()
 #	get_parent().add_child(rb)
 #	check queue_free on crumble
-	add_child(rb) # check queue_free
+	add_child(rb)  # check queue_free
 	rb.position.x += rand_range(-16, 16)
 	rb.position.y += rand_range(-16, 16)
 	rb.start("crumble" + str(num))

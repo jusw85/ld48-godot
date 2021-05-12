@@ -182,11 +182,12 @@ func _create_map():
 				tilemap.set_cell(x, y, -1)
 				_create_instance(Gem.instance(), x, y)
 			elif tile_id == 4:
-				var auto = tilemap.get_cell_autotile_coord(x, y)
-				tilemap.set_cell(x, y, -1)
-				var inst = Rock.instance()
-				_create_instance(inst, x, y) # rename to add_isntance_to_map
-				inst.start(int(auto.x))
+				var auto = tilemap.get_cell_autotile_coord(x, y).x
+				if auto >= 1 and auto <= 7:
+					tilemap.set_cell(x, y, -1)
+					var inst = Rock.instance()
+					_create_instance(inst, x, y)  # rename to add_isntance_to_map
+					inst.start(int(auto))
 #				pass
 
 			elif tile_id == 6:
@@ -197,14 +198,22 @@ func _create_map():
 			elif tile_id == 9:
 				tilemap.set_cell(x, y, -1)
 				var p = randf()
+				var auto
 				if p < cur_stone_prob[0]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
+					auto = 1
+#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
 				elif p < cur_stone_prob[1]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
+					auto = 3
+#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
 				elif p < cur_stone_prob[2]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
+					auto = 5
+#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
 				else:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
+					auto = 7
+#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
+				var inst = Rock.instance()
+				_create_instance(inst, x, y)  # rename to add_isntance_to_map
+				inst.start(int(auto))
 
 	for y in range(gen_bottom, gen_bottom + gen_range):
 		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
@@ -251,9 +260,12 @@ func check_create_map(depth: int):
 			gen_depth = depth
 			_create_map()
 		else:
+			# TODO: this logic should be movied to main
+			# if depth is > threshold, spawn_hell()
 			is_hell = true
 			_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
 			hell_inst.remove_child(hell_tilemap)
+			# for adding the area2d trigger
 			_create_instance(hell_inst, 0, gen_bottom)
 			for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
 				border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
@@ -267,6 +279,15 @@ func check_create_map(depth: int):
 						var spike_inst = Spike.instance()
 						spike_inst.dmg = 30
 						_create_instance(spike_inst, x, y)
+
+					elif tile_id == 4:
+						var auto = tilemap.get_cell_autotile_coord(x, y).x
+						if auto >= 1 and auto <= 7:
+							tilemap.set_cell(x, y, -1)
+							var inst = Rock.instance()
+							_create_instance(inst, x, y)  # rename to add_isntance_to_map
+							inst.start(int(auto))
+		#				pass
 
 
 #func _replace_map_tiles_with_objects():

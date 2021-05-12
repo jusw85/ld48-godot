@@ -1,6 +1,5 @@
 extends Reference
 
-
 var state = -1
 var _states
 var _enter_funcs = []

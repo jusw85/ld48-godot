@@ -12,11 +12,11 @@ func _ready():
 	sprite.frame = randi() % num_frames
 
 
-func _on_Area2D_body_entered(body):
-	body.fuel += fuel_pickup_value
-	sprite.visible = false
-	collider.set_deferred("disabled", true)
-	sfx.play()
+#func _on_Area2D_body_entered(body):
+#	body.fuel += fuel_pickup_value
+#	sprite.visible = false
+#	collider.set_deferred("disabled", true)
+#	sfx.play()
 
 
 func _on_Sfx_finished():

@@ -11,10 +11,9 @@ func _ready():
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
-
-func _on_Area2D_body_entered(body):
-	if body.name == "Player":
-		body.do_hell()
+func _process(delta):
+	if Input.is_action_just_pressed("ui_left"):
+		var tween = Tween.new()
+#		add_child(tween)
+	if Input.is_action_just_pressed("ui_right"):
+		get_tree().reload_current_scene()
