@@ -1,19 +1,15 @@
 extends KinematicBody2D
 
-# check store velocity between frames, increasing gravity
-# positional audio for punch
+# alternate left right hand punch
 # BUG: check collectibles being destroyed on creation below due to visibility notifier?
-# visibility notifier for spikes, blocks for cleanup
-# fsm
-# fix depth calculation in e.g. level
-# tighten controls
 # collectible AOE, --> (fly to player)
-# reduce spike aoe
+# visibility notifier for spikes, blocks for cleanup
+# cleanup level
+# fix depth calculation in e.g. level
 # dust effect on drop
-# lerp global camera
-# texture (cross) hatch shader
 # HUD bars
 # HUD depth slider?
+# low prio: texture (cross) hatch shader
 # low prio: reorder tilemap ids (fixed in 4.0)
 
 signal fuel_changed(fuel)  # gui
@@ -24,26 +20,26 @@ signal player_died  # main
 
 enum State { IDLE, PUNCH_R, PUNCH_D, FALLING, WALKING, DEAD }
 
-export var walk_speed := 600.0
-export var gravity := 500.0
-export var start_fuel := 30
-export var xp_to_level := [2, 4, 6]
-export var punch_strength := [1, 2, 3, 4]
+export var walk_speed := 300.0
+export var gravity := 2750.0
+export var start_fuel := 100
+export var xp_to_level := [7, 15, 25]
+export var punch_strength := [1, 2, 3, 5]
 
 var gem := 0 setget set_gem
-var depth := -1
-var xp_level := 0
 var mask_size setget set_mask_size, get_mask_size
 
-var to_del_downpunch
+var _velocity := Vector2.ZERO
+var _xp_level := 0
 var _fsm: NC.StateMachine
+var _punch_d_rock
 
 onready var fuel := start_fuel setget set_fuel
 onready var player_frames = [
-	preload("res://player/person1_ss.png"),
-	preload("res://player/person2_ss.png"),
-	preload("res://player/person3_ss.png"),
-	preload("res://player/person4_ss.png"),
+	preload("res://player/assets/person1_ss.png"),
+	preload("res://player/assets/person2_ss.png"),
+	preload("res://player/assets/person3_ss.png"),
+	preload("res://player/assets/person4_ss.png"),
 ]
 
 onready var directional_input: NC.DirectionalInput = $DirectionalInput
@@ -88,10 +84,10 @@ func set_gem(val: int) -> void:
 	assert(val > gem)
 	gem = int(max(val, 0))
 	emit_signal("gem_changed", gem)
-	if xp_level < xp_to_level.size() and gem >= xp_to_level[xp_level]:
-		xp_level += 1
-		sprite.texture = player_frames[xp_level]
-		emit_signal("level_changed", xp_level)
+	if _xp_level < xp_to_level.size() and gem >= xp_to_level[_xp_level]:
+		_xp_level += 1
+		sprite.texture = player_frames[_xp_level]
+		emit_signal("level_changed", _xp_level)
 
 
 func set_fuel(val: int) -> void:
@@ -134,7 +130,7 @@ func _process_idle():
 
 func _enter_punch_r(rock):
 	animation_player.play("punch_r")
-	rock.break_rock(punch_strength[xp_level], xp_level)
+	rock.break_rock(punch_strength[_xp_level], _xp_level)
 	self.fuel -= 1
 	punch_sfx.play()
 
@@ -158,14 +154,17 @@ func _process_punch_r():
 	elif d_cast.is_colliding() and dir.y > 0:
 		_fsm.change_state(State.PUNCH_D, [d_cast.get_collider().get_parent()])
 	elif dir.x != 0.0:
-		_fsm.change_state(State.IDLE)
-	else:
 		_fsm.change_state(State.WALKING)
+	else:
+		_fsm.change_state(State.IDLE)
 
 
 func _enter_punch_d(rock):
-	animation_player.play("punch_d")
-	to_del_downpunch = rock
+	if animation_player.assigned_animation == "punch_d1":
+		animation_player.play("punch_d2")
+	else:
+		animation_player.play("punch_d1")
+	_punch_d_rock = rock
 	self.fuel -= 1
 	punch_sfx.play()
 
@@ -189,9 +188,9 @@ func _process_punch_d():
 	elif d_cast.is_colliding() and dir.y > 0:
 		_fsm.change_state(State.PUNCH_D, [d_cast.get_collider().get_parent()])
 	elif dir.x != 0.0:
-		_fsm.change_state(State.IDLE)
-	else:
 		_fsm.change_state(State.WALKING)
+	else:
+		_fsm.change_state(State.IDLE)
 
 
 func _enter_falling():
@@ -260,13 +259,12 @@ func _is_grounded() -> bool:
 
 
 func _move(dir):
-	var velocity = Vector2.ZERO
-	velocity.x = dir.x * walk_speed
-	velocity.y += gravity
-	velocity.y = clamp(velocity.y, 0, INF)
+	_velocity.x = dir.x * walk_speed
+	_velocity.y += gravity * get_physics_process_delta_time()
+	_velocity.y = clamp(_velocity.y, 0, 540)
 
 	var old_position = position.y
-	move_and_slide(velocity, Vector2.UP)
+	_velocity = move_and_slide(_velocity, Vector2.UP)
 	if position.y > old_position:
 		emit_signal("depth_changed")
 
@@ -284,5 +282,4 @@ func _on_InvulnTimer_timeout():
 
 func _on_AnimationPlayer_animation_finished(_anim_name):
 	if _fsm.state == State.PUNCH_D:
-		to_del_downpunch.break_rock(punch_strength[xp_level], xp_level)
-		d_cast.force_raycast_update()
+		_punch_d_rock.break_rock(punch_strength[_xp_level], _xp_level)

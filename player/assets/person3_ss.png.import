@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/cave2.png-5fcc34f9129b8443a0e11eb492cfe32d.stex"
+path="res://.import/person3_ss.png-59728598060b3bfe5a313a766c39c901.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://level/assets/cave2.png"
-dest_files=[ "res://.import/cave2.png-5fcc34f9129b8443a0e11eb492cfe32d.stex" ]
+source_file="res://player/assets/person3_ss.png"
+dest_files=[ "res://.import/person3_ss.png-59728598060b3bfe5a313a766c39c901.stex" ]
 
 [params]
 

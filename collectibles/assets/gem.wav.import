@@ -2,12 +2,12 @@
 
 importer="wav"
 type="AudioStreamSample"
-path="res://.import/gem.wav-4ed67c58a0499c78765e896361078f20.sample"
+path="res://.import/gem.wav-9eaa6af4463097fc50a494efb9aaf09d.sample"
 
 [deps]
 
-source_file="res://collectibles/gem.wav"
-dest_files=[ "res://.import/gem.wav-4ed67c58a0499c78765e896361078f20.sample" ]
+source_file="res://collectibles/assets/gem.wav"
+dest_files=[ "res://.import/gem.wav-9eaa6af4463097fc50a494efb9aaf09d.sample" ]
 
 [params]
 

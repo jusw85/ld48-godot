@@ -1,11 +1,17 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://level/soil_tilemap.tres" type="TileSet" id=1]
-[ext_resource path="res://level/assets/crumble.wav" type="AudioStream" id=2]
+[ext_resource path="res://level/assets/background.png" type="Texture" id=2]
 [ext_resource path="res://level/level.gd" type="Script" id=3]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 3 )
+
+[node name="Background" type="Sprite" parent="."]
+self_modulate = Color( 0.25098, 0.513726, 0.847059, 1 )
+position = Vector2( 0, -476 )
+texture = ExtResource( 2 )
+centered = false
 
 [node name="Soil" type="TileMap" parent="."]
 tile_set = ExtResource( 1 )
@@ -23,7 +29,3 @@ tile_set = ExtResource( 1 )
 collision_mask = 0
 format = 1
 tile_data = PoolIntArray( -524289, 4, 8, -589809, 4, 8, -458753, 4, 8, -524273, 4, 8, -393217, 4, 8, -458737, 4, 8, -327681, 4, 8, -393201, 4, 8, -262145, 4, 8, -327665, 4, 8, -196609, 4, 8, -262129, 4, 8, -131073, 4, 8, -196593, 4, 8, -65537, 4, 8, -131057, 4, 8, -1, 4, 8, -65521, 4, 8, 65535, 4, 8, 15, 4, 8 )
-
-[node name="CrumbleSfx" type="AudioStreamPlayer" parent="."]
-stream = ExtResource( 2 )
-bus = "Sfx"

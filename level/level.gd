@@ -74,7 +74,6 @@ var tile_prob_cum
 var stone_prob_cum
 
 
-# feature: create premade vaults
 func _ready():
 	randomize()
 	tile_prob_cum = tile_prob.duplicate(true)
@@ -88,6 +87,8 @@ func _ready():
 			row[x] = row[x - 1] + row[x]
 
 #	_replace_map_tiles_with_objects()
+
+#	THIS IS LEAKING
 	spike1_tilemap = Spike1.instance().get_node("TileMap")
 	spike1_rect = spike1_tilemap.get_used_rect()
 	trap1_tilemap = Trap1.instance().get_node("TileMap")
@@ -242,7 +243,8 @@ func _spawn_premade(inst_tilemap: TileMap, rect: Rect2, x: int, y: int):
 
 func _create_instance(instance: Node, x: int, y: int):
 	add_child(instance)
-	var local_pos = tilemap.map_to_world(Vector2(x, y))
+	var local_pos = tilemap.map_to_world(Vector2(x, y)) + (tilemap.cell_size / 2.0)
+#	var local_pos = tilemap.map_to_world(Vector2(x, y))
 	instance.position = local_pos
 
 
@@ -260,34 +262,39 @@ func check_create_map(depth: int):
 			gen_depth = depth
 			_create_map()
 		else:
-			# TODO: this logic should be movied to main
-			# if depth is > threshold, spawn_hell()
-			is_hell = true
-			_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
-			hell_inst.remove_child(hell_tilemap)
-			# for adding the area2d trigger
-			_create_instance(hell_inst, 0, gen_bottom)
-			for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
-				border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
-				border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
-				for x in range(0, 15):
-					soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
+			spawn_hell()
 
-					var tile_id = tilemap.get_cell(x, y)
-					if tile_id == 6:
-						tilemap.set_cell(x, y, -1)
-						var spike_inst = Spike.instance()
-						spike_inst.dmg = 30
-						_create_instance(spike_inst, x, y)
 
-					elif tile_id == 4:
-						var auto = tilemap.get_cell_autotile_coord(x, y).x
-						if auto >= 1 and auto <= 7:
-							tilemap.set_cell(x, y, -1)
-							var inst = Rock.instance()
-							_create_instance(inst, x, y)  # rename to add_isntance_to_map
-							inst.start(int(auto))
-		#				pass
+func spawn_hell():
+	# TODO: this logic should be moved to main
+	# in main: if depth is > threshold, spawn_hell()
+	is_hell = true
+	_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
+	hell_inst.remove_child(hell_tilemap)
+	# for adding the area2d trigger
+	_create_instance(hell_inst, 0, gen_bottom)
+	for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
+		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
+		border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
+		for x in range(0, 15):
+			soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
+
+			var tile_id = tilemap.get_cell(x, y)
+			if tile_id == 6:
+				tilemap.set_cell(x, y, -1)
+				var spike_inst = Spike.instance()
+				spike_inst.dmg = 30
+				_create_instance(spike_inst, x, y)
+
+			elif tile_id == 4:
+				var auto = tilemap.get_cell_autotile_coord(x, y).x
+				if auto >= 1 and auto <= 7:
+					tilemap.set_cell(x, y, -1)
+					var inst = Rock.instance()
+					_create_instance(inst, x, y)  # rename to add_isntance_to_map
+					inst.start(int(auto))
+#				pass
+
 
 
 #func _replace_map_tiles_with_objects():
@@ -314,75 +321,3 @@ func get_grid_pos(p_global_pos: Vector2) -> Vector2:
 	var local_pos = tilemap.to_local(p_global_pos)
 	return tilemap.world_to_map(local_pos)
 
-
-func is_rock(p_grid_pos: Vector2) -> bool:
-#	return true
-	var tile_id := tilemap.get_cellv(p_grid_pos)
-	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
-	return tile_id == 4 and autotile_id.x <= 7 and autotile_id.x >= 1
-
-
-# use objects for rocks?
-# object destroyer above player
-func break_rock(p_grid_pos: Vector2, p_dmg: int, p_level: int):
-	assert(is_rock(p_grid_pos))
-	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
-	var rock_id := int(autotile_id.x)
-	var new_rock_id = rock_id - p_dmg
-	for i in [1, 3, 5, 7]:
-		if i in range(new_rock_id + 1, rock_id + 1):
-			_spawn_rockbreak(p_grid_pos, i, p_level)
-
-	if new_rock_id < 1:
-		crumble_sfx.play()
-		tilemap.set_cellv(p_grid_pos, -1)
-	else:
-		tilemap.set_cell(
-			p_grid_pos.x, p_grid_pos.y, 4, false, false, false, Vector2(new_rock_id, 0)
-		)
-	tilemap.update_dirty_quadrants()
-
-
-#func try_break_rock(p_global_pos: Vector2, p_dmg: int) -> bool:
-#	var tileinfo := NC.TileMapUtils.global_pos_to_tileinfo(tilemap, p_global_pos)
-#	if tileinfo.tile_id == 4 and tileinfo.autotile_id.x <= 7 and tileinfo.autotile_id.x >= 1:
-#		var rock_id := int(tileinfo.autotile_id.x)
-#		var new_rock_id = rock_id - p_dmg
-#		for i in [1, 3, 5, 7]:
-#			if i in range(new_rock_id + 1, rock_id + 1):
-#				_spawn_rockbreak(tileinfo, i)
-#
-#		if new_rock_id < 1:
-#			crumble_sfx.play()
-#			tilemap.set_cellv(tileinfo.grid_pos, -1)
-#		else:
-#			var new_autotile = Vector2(new_rock_id, tileinfo.autotile_id.y)
-#			tilemap.set_cell(
-#				tileinfo.grid_pos.x,
-#				tileinfo.grid_pos.y,
-#				tileinfo.tile_id,
-#				false,
-#				false,
-#				false,
-#				new_autotile
-#			)
-#		return true
-#	return false
-
-const RockBreak := preload("res://level/rock_anim.tscn")
-# TODO: positional crumble audio
-onready var crumble_sfx: AudioStreamPlayer = $CrumbleSfx
-
-
-func _spawn_rockbreak(p_grid_pos: Vector2, num: int, p_level: int) -> void:
-	if p_level == 2:
-		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
-	elif p_level == 3:
-		Globals.camera.get_node("Shake").shake(0.10, 100.0, 8.0)
-
-	var rb = RockBreak.instance()
-	tilemap.add_child(rb)
-	rb.position = tilemap.map_to_world(p_grid_pos)
-	rb.position.x += rand_range(-16, 16)
-	rb.position.y += rand_range(-16, 16)
-	rb.start("crumble" + str(num))

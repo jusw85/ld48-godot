@@ -1,11 +1,11 @@
 extends Node2D
 
-# global signal handler
+# queue_free this damn thing
+# global signal handler for camera shake
 signal rock_broken
 
 const RockBreak := preload("res://level/rock_anim.tscn")
 onready var sprite: Sprite = $StaticBody2D/Sprite
-# TODO: positional crumble audio
 
 
 func start(id: int):
@@ -48,9 +48,8 @@ func break_rock(p_dmg: int, p_level: int):
 	if new_rock_id < 1:
 		$CrumbleSfx.play()
 		sprite.visible = false
-		$StaticBody2D/CollisionShape2D.disabled = true
-#		use this in physics process
-#		$StaticBody2D/CollisionShape2D.set_deferred("disabled", true)
+#		$StaticBody2D/CollisionShape2D.disabled = true
+		$StaticBody2D/CollisionShape2D.set_deferred("disabled", true)
 	else:
 		sprite.frame = new_rock_id
 

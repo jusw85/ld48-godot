@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/mask.png-33ca2f52cf751268828275f06a9c9696.stex"
+path="res://.import/fuel.png-d21447e3109300ffccf1e3064d252cad.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://player/mask.png"
-dest_files=[ "res://.import/mask.png-33ca2f52cf751268828275f06a9c9696.stex" ]
+source_file="res://collectibles/assets/fuel.png"
+dest_files=[ "res://.import/fuel.png-d21447e3109300ffccf1e3064d252cad.stex" ]
 
 [params]
 

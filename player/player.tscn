@@ -1,13 +1,13 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://common/directional_input.gd" type="Script" id=1]
 [ext_resource path="res://player/player.gd" type="Script" id=2]
 [ext_resource path="res://common/shader/mask.shader" type="Shader" id=4]
-[ext_resource path="res://player/punch.wav" type="AudioStream" id=5]
-[ext_resource path="res://player/mask.png" type="Texture" id=7]
+[ext_resource path="res://player/assets/punch.wav" type="AudioStream" id=5]
+[ext_resource path="res://player/assets/mask.png" type="Texture" id=7]
 [ext_resource path="res://common/sprite_flasher.tscn" type="PackedScene" id=8]
 [ext_resource path="res://common/shader/sprite_flash.shader" type="Shader" id=9]
-[ext_resource path="res://player/person1_ss.png" type="Texture" id=10]
+[ext_resource path="res://player/assets/person1_ss.png" type="Texture" id=10]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 14, 29 )
@@ -39,8 +39,8 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id=5]
-resource_name = "punch_d"
-length = 0.6
+resource_name = "punch_d1"
+length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
 tracks/0/interp = 1
@@ -48,14 +48,29 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
-"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "update": 1,
-"values": [ 8, 9, 10, 11, 12, 13 ]
+"values": [ 8, 9, 10 ]
 }
 
 [sub_resource type="Animation" id=6]
-resource_name = "punch_r"
+resource_name = "punch_d2"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 11, 12, 13 ]
+}
+
+[sub_resource type="Animation" id=7]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -70,7 +85,7 @@ tracks/0/keys = {
 "values": [ 4, 5, 6 ]
 }
 
-[sub_resource type="Animation" id=7]
+[sub_resource type="Animation" id=8]
 length = 0.4
 loop = true
 tracks/0/type = "value"
@@ -86,17 +101,16 @@ tracks/0/keys = {
 "values": [ 0, 1, 2, 3 ]
 }
 
-[sub_resource type="CircleShape2D" id=8]
+[sub_resource type="CircleShape2D" id=9]
 radius = 48.0
 
 [node name="KinematicBody2D" type="KinematicBody2D"]
 collision_layer = 0
-collision_mask = 9
+collision_mask = 11
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true
 }
-xp_to_level = [ 7, 15, 25 ]
 
 [node name="DirectionalInput" type="Node" parent="."]
 script = ExtResource( 1 )
@@ -145,14 +159,16 @@ collision_mask = 4
 material = SubResource( 3 )
 texture = ExtResource( 10 )
 hframes = 14
+frame = 8
 
 [node name="SpriteFlasher" parent="Sprite" instance=ExtResource( 8 )]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/idle = SubResource( 4 )
-anims/punch_d = SubResource( 5 )
-anims/punch_r = SubResource( 6 )
-anims/walking = SubResource( 7 )
+anims/punch_d1 = SubResource( 5 )
+anims/punch_d2 = SubResource( 6 )
+anims/punch_r = SubResource( 7 )
+anims/walking = SubResource( 8 )
 
 [node name="PunchSfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 5 )
@@ -163,11 +179,12 @@ wait_time = 2.0
 one_shot = true
 
 [node name="Collector" type="Area2D" parent="."]
+monitoring = false
 collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Collector"]
-shape = SubResource( 8 )
+shape = SubResource( 9 )
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
 [connection signal="timeout" from="InvulnTimer" to="." method="_on_InvulnTimer_timeout"]

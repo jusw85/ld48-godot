@@ -130,7 +130,6 @@ animations = [ {
 script = ExtResource( 2 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
-position = Vector2( 32, 32 )
 z_index = 1
 frames = SubResource( 21 )
 animation = "crumble1"

@@ -19,6 +19,7 @@ const float scale = (log_target_right - log_target_left) / (slider_right - slide
 void fragment() {
 	float dist = exp(log_target_left + scale * (size - slider_left));
 	float a = distance(UV, mid) / dist;
+	a = clamp(a, 0.0, 1.0);
 	vec3 c = vec3(0.0);
 	COLOR = vec4(c, a);
 }
