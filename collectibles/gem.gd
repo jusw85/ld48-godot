@@ -1,6 +1,5 @@
 extends "res://collectibles/collectible.gd"
 
-
 export var gem_pickup_value := 1
 export var flash_time := Vector2(2.0, 5.0)
 

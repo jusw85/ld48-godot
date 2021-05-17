@@ -1,6 +1,5 @@
 extends "res://collectibles/collectible.gd"
 
-
 export var fuel_pickup_value := 5
 
 

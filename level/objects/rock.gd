@@ -4,11 +4,11 @@ extends Node2D
 # global signal handler for camera shake
 signal rock_broken
 
-const RockBreak := preload("res://level/rock_anim.tscn")
+const RockBreak := preload("res://level/objects/rock_anim.tscn")
 onready var sprite: Sprite = $StaticBody2D/Sprite
 
 
-func start(id: int):
+func init(id: int):
 	sprite.frame = id
 
 
@@ -27,7 +27,7 @@ func _ready():
 
 func break_block():
 	print("BREAKING!")
-	emit_signal("rock_broken") # camera shake
+	emit_signal("rock_broken")  # camera shake
 
 
 #func is_rock(p_grid_pos: Vector2) -> bool:

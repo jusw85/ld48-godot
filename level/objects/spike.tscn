@@ -1,12 +1,14 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://level/assets/spike1.png" type="Texture" id=1]
-[ext_resource path="res://level/spike.gd" type="Script" id=2]
+[ext_resource path="res://level/objects/spike.gd" type="Script" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 20, 16 )
 
-[node name="Node2D" type="Node2D"]
+[node name="Spike" type="Node2D" groups=[
+"spike",
+]]
 script = ExtResource( 2 )
 
 [node name="Area2D" type="Area2D" parent="."]

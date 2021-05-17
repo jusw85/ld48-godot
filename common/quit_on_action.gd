@@ -9,3 +9,4 @@ func _unhandled_input(p_event: InputEvent) -> void:
 		and (OS.get_name() == "Windows" or OS.get_name() == "OSX" or OS.get_name() == "X11")
 	):
 		get_tree().quit()
+		get_tree().notification(MainLoop.NOTIFICATION_WM_QUIT_REQUEST)

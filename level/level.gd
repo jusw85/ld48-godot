@@ -1,301 +1,233 @@
+# warning-ignore-all:return_value_discarded
 extends Node2D
-
-onready var tilemap: TileMap = $TileMap
-onready var border: TileMap = $Border
-onready var soil: TileMap = $Soil
-
-var bounds_min := Vector2(INF, INF)
-var bounds_max := Vector2(-INF, -INF)
-
-var gen_depth := 0
-var gen_bottom := 1
-var gen_buffer := 7
-var gen_range := 10
 
 const Fuel := preload("res://collectibles/fuel.tscn")
 const Gem := preload("res://collectibles/gem.tscn")
-const Spike := preload("res://level/spike.tscn")
-const Rock := preload("res://level/rock.tscn")
-
-const Spike1 := preload("res://level/premade/spike1.tscn")
-var spike1_tilemap
-var spike1_rect
-
-const Trap1 := preload("res://level/premade/trap1.tscn")
-var trap1_tilemap
-var trap1_rect
-
-const Trap2 := preload("res://level/premade/trap2.tscn")
-var trap2_tilemap
-var trap2_rect
-
-const Hell := preload("res://level/premade/hell.tscn")
-var hell_inst
-var hell_tilemap
-var hell_rect
-
-# fuel, gem, empty, spike, trap1, trap2, stone(rest)
-# last val is remaining, doesn't need to be correct
-var tile_prob = [
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.71],
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
-	[0.09, 0.02, 0.20, 0.00, 0.00, 0.00, 0.61],
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
-	[0.08, 0.03, 0.20, 0.02, 0.00, 0.00, 0.61],
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
-	[0.07, 0.04, 0.20, 0.04, 0.003, 0.000, 0.61],
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
-	[0.06, 0.05, 0.20, 0.06, 0.006, 0.004, 0.61],
-	[0.06, 0.05, 0.20, 0.08, 0.006, 0.004, 0.61],
-	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61],
-	[0.06, 0.05, 0.20, 0.08, 0.009, 0.006, 0.61],
-	[0.06, 0.05, 0.20, 0.10, 0.009, 0.006, 0.61],
+const Rock := preload("res://level/objects/rock.tscn")
+const Spike := preload("res://level/objects/spike.tscn")
+const Premades = [
+	preload("res://level/premade/spiketrap.tscn"),
+	preload("res://level/premade/vault1.tscn"),
+	preload("res://level/premade/vault2.tscn"),
+	preload("res://level/premade/hell.tscn"),
 ]
 
-var stone_prob = [
-	[0.90, 0.10, 0.00, 0.00],
-	[0.80, 0.15, 0.05, 0.00],
-	[0.75, 0.15, 0.05, 0.05],
-	[0.65, 0.20, 0.10, 0.05],
-	[0.50, 0.30, 0.10, 0.10],
-	[0.30, 0.40, 0.15, 0.15],
-	[0.25, 0.45, 0.15, 0.15],
-	[0.20, 0.40, 0.20, 0.20],
-	[0.15, 0.30, 0.30, 0.25],
-	[0.10, 0.20, 0.40, 0.30],
-	[0.05, 0.10, 0.45, 0.40],
-	[0.05, 0.05, 0.40, 0.50],
-]
+# https://github.com/godotengine/godot/issues/33095
+# Also save _rng.state from randomize() for reproducible streams
+export var use_seed := false
+export var rng_seed := 0
+export var map_width := 15
 
-var tile_prob_cum
-var stone_prob_cum
+var bottom := 1
+var bounds_min := Vector2(INF, INF)
+var bounds_max := Vector2(-INF, -INF)
+
+var _rng: RandomNumberGenerator
+var _premade_instances = []
+var _premade_tilemaps = []
+var _premade_rects = []
+
+onready var tilemap: TileMap = $TileMap
+onready var soil: TileMap = $Soil
 
 
 func _ready():
-	randomize()
-	tile_prob_cum = tile_prob.duplicate(true)
-	for row in tile_prob_cum:
-		for x in range(1, row.size()):
-			row[x] = row[x - 1] + row[x]
+	_init_rng()
 
-	stone_prob_cum = stone_prob.duplicate(true)
-	for row in stone_prob_cum:
-		for x in range(1, row.size()):
-			row[x] = row[x - 1] + row[x]
+	for premade in Premades:
+		var inst = premade.instance()
+		var inst_tilemap = inst.get_node("TileMap")
+		var inst_rect = inst_tilemap.get_used_rect()
 
-#	_replace_map_tiles_with_objects()
+		_premade_instances.append(inst)
+		_premade_tilemaps.append(inst_tilemap)
+		_premade_rects.append(inst_rect)
 
-#	THIS IS LEAKING
-	spike1_tilemap = Spike1.instance().get_node("TileMap")
-	spike1_rect = spike1_tilemap.get_used_rect()
-	trap1_tilemap = Trap1.instance().get_node("TileMap")
-	trap1_rect = trap1_tilemap.get_used_rect()
-	trap2_tilemap = Trap2.instance().get_node("TileMap")
-	trap2_rect = trap2_tilemap.get_used_rect()
-
-	hell_inst = Hell.instance()
-	hell_tilemap = hell_inst.get_node("TileMap")
-	hell_rect = hell_tilemap.get_used_rect()
-
-	_create_map()
-	_calculate_map_bounds()
+	var res = NC.TileMapUtils.calculate_map_bounds(tilemap)
+	bounds_min = res[2]
+	bounds_max = res[3]
 
 
-func _calculate_map_bounds():
-	var used_cells = border.get_used_cells()
-#	var used_cells = tilemap.get_used_cells()
-	for pos in used_cells:
-		if pos.x < bounds_min.x:
-			bounds_min.x = int(pos.x)
-		elif pos.x > bounds_max.x:
-			bounds_max.x = int(pos.x)
-		if pos.y < bounds_min.y:
-			bounds_min.y = int(pos.y)
-		elif pos.y > bounds_max.y:
-			bounds_max.y = int(pos.y)
-	bounds_min = border.to_global(border.map_to_world(bounds_min))
-	bounds_max = border.to_global(border.map_to_world(bounds_max))
-	bounds_min.x += 64
-	bounds_max.x -= 64
+func _notification(what):
+	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+		for premade in _premade_instances:
+			premade.queue_free()
 
 
-# 6 down view range
-# 15 across x 10 = 150 tiles
-# fuel: 0
-# gem: 1
-# rocks: 4 - 1, 3, 5 ,7
-# gen_depth: 0,4,14,24,34,...
-# gen_depth normalized: 1,2,3,4
-# gem / fuel / emptytiles / stone
-func _create_map():
-#	var total_tiles = gen_range * 15
-	var idx = int(clamp(gen_depth, 0, tile_prob_cum.size() - 1))
-	var idx2 = int(clamp(gen_depth, 0, stone_prob_cum.size() - 1))
-	var cur_tile_prob = tile_prob_cum[idx]
-	var cur_stone_prob = stone_prob_cum[idx2]
+func get_grid_pos(p_global_pos: Vector2) -> Vector2:
+	var local_pos = tilemap.to_local(p_global_pos)
+	return tilemap.world_to_map(local_pos)
 
-	for y in range(gen_bottom, gen_bottom + gen_range):
+
+func create_rows(p_num_rows: int, p_difficulty: int):
+	var i
+	i = int(clamp(p_difficulty, 0, Globals.tile_probability.size() - 1))
+	var tile_probability = Globals.tile_probability[i]
+	i = int(clamp(p_difficulty, 0, Globals.rock_probability.size() - 1))
+	var rock_probability = Globals.rock_probability[i]
+
+	# draw border and soil
+	for y in range(bottom, bottom + p_num_rows):
+		_draw_border(y)
+		for x in range(map_width):
+			_draw_soil(y, x)
+
+	# draw tiles
+	for y in range(bottom, bottom + p_num_rows):
 		var x = 0
-		while x < 15:
-			soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
-			if tilemap.get_cell(x, y) >= 0:
+		while x < map_width:
+			if _try_create_cell(y, x, tile_probability, rock_probability):
 				x += 1
-				continue
 
-			var p = randf()
-			if p < cur_tile_prob[0]:
-				tilemap.set_cell(x, y, 0)
-			elif p < cur_tile_prob[1]:
-				tilemap.set_cell(x, y, 1)
-			elif p < cur_tile_prob[2]:
+	# convert to object
+	for y in range(bottom, bottom + p_num_rows):
+		for x in range(0, map_width):
+			_convert_tile_to_object(y, x)
+
+	bottom = bottom + p_num_rows
+
+
+func create_hell():
+	var hell_tilemap = _premade_tilemaps[3]
+	var hell_rect = _premade_rects[3]
+	var hell_inst = _premade_instances[3]
+
+	NC.TileMapUtils.copy_tilemap(hell_tilemap, hell_rect, bottom, 0, tilemap)
+	hell_inst.remove_child(hell_tilemap)
+	_add_node(bottom, 0, hell_inst, false)
+
+	for y in range(bottom, bottom + hell_rect.size.y + 15):
+		_draw_border(y)
+		for x in range(0, map_width):
+			_draw_soil(y, x)
+			var node = _convert_tile_to_object(y, x)
+			if node != null and node.is_in_group("spike"):
+				node.dmg = 30
+
+
+func _convert_tile_to_object(y: int, x: int) -> Node:
+	var node = null
+	match tilemap.get_cell(x, y):
+		0:
+			tilemap.set_cell(x, y, TileMap.INVALID_CELL)
+			node = Fuel.instance()
+			_add_node(y, x, node)
+		1:
+			tilemap.set_cell(x, y, TileMap.INVALID_CELL)
+			node = Gem.instance()
+			_add_node(y, x, node)
+		4:
+			var autotile_id = int(tilemap.get_cell_autotile_coord(x, y).x)
+			if autotile_id >= 1 and autotile_id <= 7:
+				tilemap.set_cell(x, y, TileMap.INVALID_CELL)
+				node = Rock.instance()
+				_add_node(y, x, node)
+				node.init(autotile_id)
+		6:
+			tilemap.set_cell(x, y, TileMap.INVALID_CELL)
+			node = Spike.instance()
+			_add_node(y, x, node)
+	return node
+
+
+func _try_create_cell(p_y: int, p_x: int, p_tile_probability: Array, p_rock_probability: Array) -> bool:
+	var cell = tilemap.get_cell(p_x, p_y)
+	if cell == 8:
+		tilemap.set_cell(p_x, p_y, TileMap.INVALID_CELL)
+	elif cell == 9:
+		_draw_random_rock(p_y, p_x, p_rock_probability)
+	elif cell == TileMap.INVALID_CELL:
+		match _get_idx_from_intervals(_rng.randf(), p_tile_probability):
+			0:
+				tilemap.set_cell(p_x, p_y, 0)
+			1:
+				tilemap.set_cell(p_x, p_y, 1)
+			2:
 				pass
-			elif p < cur_tile_prob[3] and _can_spawn(spike1_rect, x, y):
-				_spawn_premade(spike1_tilemap, spike1_rect, x, y)
-				continue
-			elif p < cur_tile_prob[4] and _can_spawn(trap1_rect, x, y):
-				_spawn_premade(trap1_tilemap, trap1_rect, x, y)
-				continue
-			elif p < cur_tile_prob[5] and _can_spawn(trap2_rect, x, y):
-				_spawn_premade(trap2_tilemap, trap2_rect, x, y)
-				continue
-			else:
-				p = randf()
-				if p < cur_stone_prob[0]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
-				elif p < cur_stone_prob[1]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
-				elif p < cur_stone_prob[2]:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
+			3:
+				if _can_spawn_premade(p_y, p_x, _premade_rects[0]):
+					NC.TileMapUtils.copy_tilemap(
+						_premade_tilemaps[0], _premade_rects[0], p_y, p_x, tilemap
+					)
+					return false
 				else:
-					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
-			x += 1
-
-	for y in range(gen_bottom, gen_bottom + gen_range):
-		for x in range(0, 15):
-			var tile_id = tilemap.get_cell(x, y)
-			if tile_id == 0:
-				tilemap.set_cell(x, y, -1)
-				_create_instance(Fuel.instance(), x, y)
-			elif tile_id == 1:
-				tilemap.set_cell(x, y, -1)
-				_create_instance(Gem.instance(), x, y)
-			elif tile_id == 4:
-				var auto = tilemap.get_cell_autotile_coord(x, y).x
-				if auto >= 1 and auto <= 7:
-					tilemap.set_cell(x, y, -1)
-					var inst = Rock.instance()
-					_create_instance(inst, x, y)  # rename to add_isntance_to_map
-					inst.start(int(auto))
-#				pass
-
-			elif tile_id == 6:
-				tilemap.set_cell(x, y, -1)
-				_create_instance(Spike.instance(), x, y)
-			elif tile_id == 8:
-				tilemap.set_cell(x, y, -1)
-			elif tile_id == 9:
-				tilemap.set_cell(x, y, -1)
-				var p = randf()
-				var auto
-				if p < cur_stone_prob[0]:
-					auto = 1
-#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(1, 0))
-				elif p < cur_stone_prob[1]:
-					auto = 3
-#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(3, 0))
-				elif p < cur_stone_prob[2]:
-					auto = 5
-#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(5, 0))
+					_draw_random_rock(p_y, p_x, p_rock_probability)
+			4:
+				if _can_spawn_premade(p_y, p_x, _premade_rects[1]):
+					NC.TileMapUtils.copy_tilemap(
+						_premade_tilemaps[1], _premade_rects[1], p_y, p_x, tilemap
+					)
+					return false
 				else:
-					auto = 7
-#					tilemap.set_cell(x, y, 4, false, false, false, Vector2(7, 0))
-				var inst = Rock.instance()
-				_create_instance(inst, x, y)  # rename to add_isntance_to_map
-				inst.start(int(auto))
+					_draw_random_rock(p_y, p_x, p_rock_probability)
+			5:
+				if _can_spawn_premade(p_y, p_x, _premade_rects[2]):
+					NC.TileMapUtils.copy_tilemap(
+						_premade_tilemaps[2], _premade_rects[2], p_y, p_x, tilemap
+					)
+					return false
+				else:
+					_draw_random_rock(p_y, p_x, p_rock_probability)
+			_:
+				_draw_random_rock(p_y, p_x, p_rock_probability)
+	return true
 
-	for y in range(gen_bottom, gen_bottom + gen_range):
-		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
-		border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
 
-	gen_bottom = gen_bottom + gen_range
-
-
-func _can_spawn(rect: Rect2, x: int, y: int) -> bool:
-	if (x + rect.size.x - 1) >= 15:
+func _can_spawn_premade(p_y: int, p_x: int, p_rect: Rect2) -> bool:
+	if (p_x + p_rect.size.x) > map_width:
 		return false
-	for y1 in int(rect.end.y):
-		for x1 in int(rect.end.x):
-			if tilemap.get_cell(x + x1, y + y1) > 0:
+	for i in int(p_rect.size.y):
+		for j in int(p_rect.size.x):
+			if tilemap.get_cell(p_x + j, p_y + i) != TileMap.INVALID_CELL:
 				return false
 	return true
 
 
-func _spawn_premade(inst_tilemap: TileMap, rect: Rect2, x: int, y: int):
-	for y1 in int(rect.end.y):
-		for x1 in int(rect.end.x):
-			var id1 = inst_tilemap.get_cell(x1, y1)
-			var auto1 = inst_tilemap.get_cell_autotile_coord(x1, y1)
-			tilemap.set_cell(x + x1, y + y1, id1, false, false, false, auto1)
+func _add_node(p_y: int, p_x: int, p_instance: Node, p_centred: bool = true):
+	add_child(p_instance)
+	var local_pos = tilemap.map_to_world(Vector2(p_x, p_y))
+	if p_centred:
+		local_pos += (tilemap.cell_size / 2.0)
+	p_instance.position = local_pos
 
 
-func _create_instance(instance: Node, x: int, y: int):
-	add_child(instance)
-	var local_pos = tilemap.map_to_world(Vector2(x, y)) + (tilemap.cell_size / 2.0)
-#	var local_pos = tilemap.map_to_world(Vector2(x, y))
-	instance.position = local_pos
+func _draw_random_rock(p_y: int, p_x: int, p_rock_probability: Array):
+	var subtile_idx
+	match _get_idx_from_intervals(_rng.randf(), p_rock_probability):
+		0:
+			subtile_idx = 1
+		1:
+			subtile_idx = 3
+		2:
+			subtile_idx = 5
+		_:
+			subtile_idx = 7
+	tilemap.set_cell(p_x, p_y, 4, false, false, false, Vector2(subtile_idx, 0))
 
 
-# first = range - buffer + 1
-# step = range
-var is_hell = false
+func _draw_soil(p_y: int, p_x: int):
+	soil.set_cell(p_x, p_y, 4)
 
 
-func check_create_map(depth: int):
-	if is_hell:
-		return
-	if depth > gen_bottom - gen_buffer:
-		depth = (depth + gen_buffer - 1) / gen_range
-		if depth < 30:
-			gen_depth = depth
-			_create_map()
-		else:
-			spawn_hell()
+func _draw_border(p_y: int):
+	tilemap.set_cell(-1, p_y, 7, false, false, false, Vector2(2, 0))
+	tilemap.set_cell(map_width, p_y, 7, false, false, false, Vector2(3, 0))
 
 
-func spawn_hell():
-	# TODO: this logic should be moved to main
-	# in main: if depth is > threshold, spawn_hell()
-	is_hell = true
-	_spawn_premade(hell_tilemap, hell_rect, 0, gen_bottom)
-	hell_inst.remove_child(hell_tilemap)
-	# for adding the area2d trigger
-	_create_instance(hell_inst, 0, gen_bottom)
-	for y in range(gen_bottom, gen_bottom + hell_rect.end.y + 15):
-		border.set_cell(-1, y, 4, false, false, false, Vector2(8, 0))
-		border.set_cell(15, y, 4, false, false, false, Vector2(8, 0))
-		for x in range(0, 15):
-			soil.set_cell(x, y, 4, false, false, false, Vector2(0, 0))
-
-			var tile_id = tilemap.get_cell(x, y)
-			if tile_id == 6:
-				tilemap.set_cell(x, y, -1)
-				var spike_inst = Spike.instance()
-				spike_inst.dmg = 30
-				_create_instance(spike_inst, x, y)
-
-			elif tile_id == 4:
-				var auto = tilemap.get_cell_autotile_coord(x, y).x
-				if auto >= 1 and auto <= 7:
-					tilemap.set_cell(x, y, -1)
-					var inst = Rock.instance()
-					_create_instance(inst, x, y)  # rename to add_isntance_to_map
-					inst.start(int(auto))
-#				pass
+func _get_idx_from_intervals(p_prob: float, p_arr: Array) -> int:
+	var length = len(p_arr)
+	for idx in length:
+		if p_prob < p_arr[idx]:
+			return idx
+	return length
 
 
+func _init_rng():
+	_rng = RandomNumberGenerator.new()
+	if use_seed:
+		_rng.seed = rng_seed
+	else:
+		_rng.randomize()
 
 #func _replace_map_tiles_with_objects():
 #	var fuels = tilemap.get_used_cells_by_id(0)
@@ -315,9 +247,3 @@ func spawn_hell():
 #		var local_pos = tilemap.map_to_world(pos)
 ##		var global_pos = tilemap.to_global(local_pos)
 #		instance.position = local_pos
-
-
-func get_grid_pos(p_global_pos: Vector2) -> Vector2:
-	var local_pos = tilemap.to_local(p_global_pos)
-	return tilemap.world_to_map(local_pos)
-

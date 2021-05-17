@@ -1,27 +1,27 @@
 extends Camera2D
 
-var cam_left_x: float
-var cam_right_x: float
+var _map_bounds_left: float
+var _map_bounds_right: float
 
-onready var player = $"../Player"
+onready var target = $"../Player"
 onready var map = $"../Map"
 
 
 func _ready():
-	cam_left_x = map.bounds_min.x
-	cam_right_x = map.bounds_max.x + 64
-	limit_left = cam_left_x
-	limit_right = cam_right_x
+	_map_bounds_left = map.bounds_min.x + 64.0
+	_map_bounds_right = map.bounds_max.x - 64.0
+	limit_left = int(_map_bounds_left)
+	limit_right = int(_map_bounds_right)
 
 
 func _process(_delta):
-	position = player.position
-	if position.x < cam_left_x + 64:
-		limit_left = position.x - 64
+	position = target.position
+	if position.x < _map_bounds_left + 64.0:
+		limit_left = int(position.x - 64.0)
 	else:
-		limit_left = cam_left_x
+		limit_left = int(_map_bounds_left)
 
-	if position.x > cam_right_x - 64:
-		limit_right = position.x + 64
+	if position.x > _map_bounds_right - 64.0:
+		limit_right = int(position.x + 64.0)
 	else:
-		limit_right = cam_right_x
+		limit_right = int(_map_bounds_right)

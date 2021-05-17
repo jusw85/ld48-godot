@@ -1,11 +1,6 @@
 extends KinematicBody2D
 
-# alternate left right hand punch
-# BUG: check collectibles being destroyed on creation below due to visibility notifier?
-# collectible AOE, --> (fly to player)
 # visibility notifier for spikes, blocks for cleanup
-# cleanup level
-# fix depth calculation in e.g. level
 # dust effect on drop
 # HUD bars
 # HUD depth slider?
@@ -33,6 +28,7 @@ var _velocity := Vector2.ZERO
 var _xp_level := 0
 var _fsm: NC.StateMachine
 var _punch_d_rock
+var _punch_d_last_anim := "punch_d2"
 
 onready var fuel := start_fuel setget set_fuel
 onready var player_frames = [
@@ -57,6 +53,7 @@ onready var sprite_flasher: NC.SpriteFlasher = $Sprite/SpriteFlasher
 
 
 func _ready() -> void:
+	self.mask_size = 1.0
 	sprite.material.set_shader_param("flash_amount", 0.0)
 
 	_fsm = NC.StateMachine.new()
@@ -160,10 +157,12 @@ func _process_punch_r():
 
 
 func _enter_punch_d(rock):
-	if animation_player.assigned_animation == "punch_d1":
+	if _punch_d_last_anim == "punch_d1":
 		animation_player.play("punch_d2")
+		_punch_d_last_anim = "punch_d2"
 	else:
 		animation_player.play("punch_d1")
+		_punch_d_last_anim = "punch_d1"
 	_punch_d_rock = rock
 	self.fuel -= 1
 	punch_sfx.play()
