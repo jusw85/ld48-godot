@@ -1,10 +1,7 @@
 extends Node2D
 
-# queue_free this damn thing
-# global signal handler for camera shake
-signal rock_broken
-
 const RockBreak := preload("res://level/objects/rock_anim.tscn")
+
 onready var sprite: Sprite = $StaticBody2D/Sprite
 
 
@@ -12,32 +9,6 @@ func init(id: int):
 	sprite.frame = id
 
 
-func _ready():
-#	print(name)
-	pass  # Replace with function body.
-
-
-#	connect("rock_broken", $"../", "_zz")
-
-#func _unhandled_input(event):
-#	if event.is_action_pressed("ui_up"):
-##		break_block()
-#		break_rock()
-
-
-func break_block():
-	print("BREAKING!")
-	emit_signal("rock_broken")  # camera shake
-
-
-#func is_rock(p_grid_pos: Vector2) -> bool:
-#	var tile_id := tilemap.get_cellv(p_grid_pos)
-#	var autotile_id := tilemap.get_cell_autotile_coord(int(p_grid_pos.x), int(p_grid_pos.y))
-#	return tile_id == 4 and autotile_id.x <= 7 and autotile_id.x >= 1
-#
-#
-## use objects for rocks?
-## object destroyer above player
 func break_rock(p_dmg: int, p_level: int):
 	var rock_id := sprite.frame
 	var new_rock_id = rock_id - p_dmg
@@ -55,16 +26,16 @@ func break_rock(p_dmg: int, p_level: int):
 
 
 func _spawn_rockbreak(num: int, p_level: int) -> void:
-#	emit_signal here
+#	maybe emit_signal here to reduce coupling, easier testing
 	if p_level == 2:
-		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
+		Events.emit_signal("camera_shake", 0.05, 100.0, 5.0)
+#		Globals.camera.get_node("Shake").shake(0.05, 100.0, 5.0)
 	elif p_level == 3:
-		Globals.camera.get_node("Shake").shake(0.10, 100.0, 8.0)
+		Events.emit_signal("camera_shake", 0.10, 100.0, 8.0)
+#		Globals.camera.get_node("Shake").shake(0.10, 100.0, 8.0)
 
 	var rb = RockBreak.instance()
-#	get_parent().add_child(rb)
-#	check queue_free on crumble
-	add_child(rb)  # check queue_free
+	add_child(rb)
 	rb.position.x += rand_range(-16, 16)
 	rb.position.y += rand_range(-16, 16)
 	rb.start("crumble" + str(num))
@@ -72,4 +43,9 @@ func _spawn_rockbreak(num: int, p_level: int) -> void:
 
 func _on_CrumbleSfx_finished():
 	pass
+#	in case crumble hasn't finished, let visibility notifier take care of cleanup
 #	queue_free()
+
+
+func _on_VisibilityNotifier2D_screen_exited():
+	queue_free()

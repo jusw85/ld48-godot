@@ -159,7 +159,6 @@ collision_mask = 4
 material = SubResource( 3 )
 texture = ExtResource( 10 )
 hframes = 14
-frame = 8
 
 [node name="SpriteFlasher" parent="Sprite" instance=ExtResource( 8 )]
 

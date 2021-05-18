@@ -1,6 +1,19 @@
 # warning-ignore-all:return_value_discarded
 extends Node2D
 
+# multiply mask alpha by value(depth) to normalise the entire mask to surface 0ft
+# e.g. modulate alpha
+# check light2d godot
+# e.g. draw transparent directly on image
+# different areas e.g. meltdowndown, lava area has custom transparent area
+# or explosions brighten darkness
+
+# dust effect on drop
+# HUD bars
+# HUD depth slider on right
+# low prio: texture (cross) hatch shader
+# low prio: reorder tilemap ids (fixed in 4.0)
+
 export var darkest_depth := 1600.0
 export var hell_depth := 3000.0
 
@@ -29,8 +42,8 @@ func _ready():
 
 
 func _unhandled_input(event: InputEvent) -> void:
-#	if _is_gameover and event.is_action_pressed("restart"):
-	if event.is_action_pressed("restart"):
+	if _is_gameover and event.is_action_pressed("restart"):
+#	if event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
 
 
@@ -68,8 +81,3 @@ func _on_Hell_hell_spikes_touched():
 	end_tween.interpolate_property(player, "mask_size", null, 1.0, 0.25)
 	end_tween.interpolate_property($Camera2D, "offset:y", null, -144.0, 0.15)
 	end_tween.start()
-
-# to listen to rock_break
-#func _rock_break() -> void:
-#	pass
-#	shake camera

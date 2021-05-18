@@ -15,7 +15,7 @@ func _init():
 	_config = ConfigFile.new()
 #	.ini doesn't show in filesystem dock
 #	https://github.com/godotengine/godot-proposals/issues/677
-	var err = _config.load("res://level/difficulty.ini")
+	var err = _config.load("res://config/difficulty.tres")
 	assert(err == OK)
 
 	var tile_probability_single = _config.get_value("difficulty", "tile_probability")

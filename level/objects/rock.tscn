@@ -26,4 +26,8 @@ texture = ExtResource( 1 )
 hframes = 9
 frame = 1
 
-[connection signal="finished" from="CrumbleSfx" to="." method="_on_CrumbleSfx_finished"]
+[node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="."]
+position = Vector2( 0, 768 )
+rect = Rect2( -32, -32, 64, 64 )
+
+[connection signal="screen_exited" from="VisibilityNotifier2D" to="." method="_on_VisibilityNotifier2D_screen_exited"]

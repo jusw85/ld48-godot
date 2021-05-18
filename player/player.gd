@@ -1,11 +1,5 @@
 extends KinematicBody2D
 
-# visibility notifier for spikes, blocks for cleanup
-# dust effect on drop
-# HUD bars
-# HUD depth slider?
-# low prio: texture (cross) hatch shader
-# low prio: reorder tilemap ids (fixed in 4.0)
 
 signal fuel_changed(fuel)  # gui
 signal gem_changed(gem)  # gui
