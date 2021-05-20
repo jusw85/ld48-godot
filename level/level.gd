@@ -48,10 +48,15 @@ func _ready():
 	bounds_max = res[3]
 
 
-func _notification(what):
-	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
-		for premade in _premade_instances:
-			premade.queue_free()
+#func _notification(what):
+#	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+#		for premade in _premade_instances:
+#			premade.queue_free()
+
+
+func _exit_tree():
+	for premade in _premade_instances:
+		premade.free()
 
 
 func get_grid_pos(p_global_pos: Vector2) -> Vector2:

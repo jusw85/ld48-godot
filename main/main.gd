@@ -1,18 +1,14 @@
 # warning-ignore-all:return_value_discarded
 extends Node2D
 
-# multiply mask alpha by value(depth) to normalise the entire mask to surface 0ft
-# e.g. modulate alpha
-# check light2d godot
-# e.g. draw transparent directly on image
-# different areas e.g. meltdowndown, lava area has custom transparent area
-# or explosions brighten darkness
+# Check light2d
+# e.g. draw transparent masks directly on image, with smooth fog blending
 
-# dust effect on drop
-# HUD bars
+# Dust effect on drop
+# Tween hud bars
 # HUD depth slider on right
-# low prio: texture (cross) hatch shader
-# low prio: reorder tilemap ids (fixed in 4.0)
+# LP: Texture crosshatch shader
+# LP: Reorder tilemap ids (fixed in 4.0)
 
 export var darkest_depth := 1600.0
 export var hell_depth := 3000.0
@@ -24,7 +20,7 @@ var _is_gameover = false
 onready var player = $Player
 onready var map = $Map
 onready var hud = $GUICanvas/HUD
-onready var end_tween = $HellTween
+onready var hell_tween = $HellTween
 
 onready var _darkest_depth = darkest_depth / 10.0
 onready var _hell_depth := hell_depth / 10.0
@@ -36,14 +32,15 @@ func _ready():
 	Globals.camera = $Camera2D
 
 	Events.connect("hell_spikes_touched", self, "_on_Hell_hell_spikes_touched")
-	hud.update_fuel(player.fuel)
+	hud.update_gem(player.gem, 0.0)
+	hud.update_fuel(player.fuel, 100.0)
 
 	map.create_rows(10, 0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _is_gameover and event.is_action_pressed("restart"):
-#	if event.is_action_pressed("restart"):
+#	if _is_gameover and event.is_action_pressed("restart"):
+	if event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
 
 
@@ -78,6 +75,6 @@ func _on_Hell_hell_spikes_touched():
 	hud.update_depth(6666, true)
 	$GUICanvas/HellTint.visible = true
 	$Camera2D.smoothing_speed = 20
-	end_tween.interpolate_property(player, "mask_size", null, 1.0, 0.25)
-	end_tween.interpolate_property($Camera2D, "offset:y", null, -144.0, 0.15)
-	end_tween.start()
+	hell_tween.interpolate_property(player, "mask_size", null, 1.0, 0.25)
+	hell_tween.interpolate_property($Camera2D, "offset:y", null, -144.0, 0.15)
+	hell_tween.start()

@@ -1,9 +1,9 @@
 extends KinematicBody2D
 
 
-signal fuel_changed(fuel)  # gui
-signal gem_changed(gem)  # gui
-signal level_changed(level)  # bgm
+signal fuel_changed(fuel, fuel_percentage)  # gui
+signal gem_changed(gem, level_percentage)  # gui
+signal level_changed(level)  # bgm, gui
 signal depth_changed  # main
 signal player_died  # main
 
@@ -74,16 +74,27 @@ func damage(dmg: int):
 func set_gem(val: int) -> void:
 	assert(val > gem)
 	gem = int(max(val, 0))
-	emit_signal("gem_changed", gem)
 	if _xp_level < xp_to_level.size() and gem >= xp_to_level[_xp_level]:
 		_xp_level += 1
 		sprite.texture = player_frames[_xp_level]
 		emit_signal("level_changed", _xp_level)
+	var level_percentage
+	if _xp_level >= xp_to_level.size():
+		level_percentage = 1.0
+	else:
+		var prev_xp_required
+		if _xp_level < 1:
+			prev_xp_required = 0.0
+		else:
+			prev_xp_required = float(xp_to_level[_xp_level - 1])
+		level_percentage = (gem - prev_xp_required) / (xp_to_level[_xp_level] - prev_xp_required)
+	level_percentage = clamp(level_percentage, 0.0, 1.0)
+	emit_signal("gem_changed", gem, level_percentage)
 
 
 func set_fuel(val: int) -> void:
-	fuel = int(max(val, 0))
-	emit_signal("fuel_changed", fuel)
+	fuel = int(clamp(val, 0, 100))
+	emit_signal("fuel_changed", fuel, fuel / 100.0)
 
 
 func get_mask_size() -> float:
@@ -92,6 +103,8 @@ func get_mask_size() -> float:
 
 func set_mask_size(p_mask_size):
 	mask_size = clamp(p_mask_size, 0.0, 1.0)
+#	mask.self_modulate.a = 1.0 - mask_size
+	mask.self_modulate.a = 1 - (0.0001) * exp(mask_size * (log(1 / 0.0001)))
 	mask.material.set_shader_param("size", mask_size)
 
 

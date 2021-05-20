@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/person4_ss.png-35c2439873abe461b85ef35b53884edc.stex"
+path="res://.import/9patch1.png-205b9ed99a260be0870d6e6bc2287b22.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://player/assets/person4_ss.png"
-dest_files=[ "res://.import/person4_ss.png-35c2439873abe461b85ef35b53884edc.stex" ]
+source_file="res://gui/assets/9patch1.png"
+dest_files=[ "res://.import/9patch1.png-205b9ed99a260be0870d6e6bc2287b22.stex" ]
 
 [params]
 
