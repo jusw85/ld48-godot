@@ -12,8 +12,10 @@ onready var fuel_bar: TextureProgress = $VBoxContainer/Fuel/Control/TextureProgr
 
 func _ready():
 	fuel_sprite.playing = true
-	gem_bar.tint_progress = gem_bar.tint_under.darkened(0.2)
-	fuel_bar.tint_progress = fuel_bar.tint_under.darkened(0.2)
+	gem_bar.tint_progress = Color("#dd9422")
+#	gem_bar.tint_progress = gem_bar.tint_under.lightened(0.2)
+#	fuel_bar.tint_progress = fuel_bar.tint_under.darkened(0.2)
+
 
 
 func update_fuel(fuel: int, fuel_percentage: float) -> void:
@@ -41,5 +43,14 @@ func _on_AnimatedSprite_animation_finished():
 
 
 func _on_Player_level_changed(level):
-	gem_bar.tint_under = gem_bar.tint_progress
-	gem_bar.tint_progress = gem_bar.tint_under.darkened(0.2)
+#	gem_bar.tint_under = gem_bar.tint_progress
+#	gem_bar.tint_progress = gem_bar.tint_under.lightened((0.2))
+	match level:
+		1:
+			gem_bar.tint_under = gem_bar.tint_progress
+			gem_bar.tint_progress = Color("#dd491c")
+		2:
+			gem_bar.tint_under = gem_bar.tint_progress
+			gem_bar.tint_progress = Color("#fb8008")
+		3:
+			pass
